@@ -1,0 +1,7 @@
+# This is a documentation repo — no build artifacts to ignore.
+# Just editor / OS noise.
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
