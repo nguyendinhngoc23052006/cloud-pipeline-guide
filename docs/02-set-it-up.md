@@ -197,7 +197,7 @@ Scaffold a MINIMAL Vite + React + TypeScript app that builds green and is ready 
 - Mocked unit tests for supabaseClient proving the fallback chain: builds a client from the VITE_ names, from the NEXT_PUBLIC_ names alone (the preview case), and shows the readable error when both are absent.
 - Run `npx supabase init` for config.toml (do NOT hand-write it). Leave the top-level project_id at its default (the folder name — NOT the remote ref). Set [db.seed] enabled=true, sql_paths=["./seed.sql"].
 - supabase/migrations/<UTC>_init.sql that only enables pgcrypto; supabase/seed.sql empty except a comment. (Auth users, storage buckets, and tables come later, when you build those features.)
-- ESLint + strict TypeScript + Prettier + Vitest with one passing test. package.json scripts named exactly `lint` and `typecheck`.
+- ESLint + strict TypeScript + Prettier + Vitest with one passing test. package.json scripts named exactly `lint`, `typecheck`, and `test` (the step 8 `tests` CI job runs `npm test`).
 - A committed package-lock.json; .github/dependabot.yml (weekly npm + github-actions, grouped); .env.example with the VITE_ vars; .gitignore ignoring .env.
 - A short CLAUDE.md in src/ (one line: components render, services validate — see the root CLAUDE.md folders rule) and in supabase/ (one line: migrations are append-only and UTC-named — see the root migrations rule). Nothing more — they grow via the memory cycle.
 Open a PR into main.
