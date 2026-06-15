@@ -1,5 +1,9 @@
 # Part 1 — The model
 
+> **This part guides you to:** understand how the pipeline works and the five
+> rules that hold it together — so the setup steps make sense. Everything later
+> depends on this; read it first.
+
 > Read **Part 1** once, do [**Part 2**](02-set-it-up.md) once (top to bottom),
 > then live in [**Part 3**](03-ship-a-feature-daily.md). In every step the
 > **numbered lines are the actions**; the italic *note* under them is the one

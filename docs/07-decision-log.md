@@ -1,5 +1,9 @@
 # Decision log
 
+> **This part guides you to:** understand *why* every part is the way it is — and
+> what was tried and rejected — before you change anything. Read this whenever you
+> (or the AI) are about to alter the pipeline.
+
 **Editing rule:** the pipeline is one connected line. Change any part only after
 verifying it against the platform's **current official docs**, then update every
 part that depends on it in the same pass — never patch one pipe alone, never from

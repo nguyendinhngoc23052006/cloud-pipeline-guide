@@ -1,5 +1,9 @@
 # Part 2 — Set it up
 
+> **This part guides you to:** wire GitHub, Claude Code, Supabase, and Vercel
+> into one gated pipeline, in 12 dependency-ordered steps. Needs Part 1's model.
+> Every later part assumes this is done.
+
 > One-time setup. Do the steps **in order**; don't start one until the last
 > step's **✓** passes. Every step is repeatable. Numbered lines are actions; the
 > italic *note* is the one thing worth knowing.

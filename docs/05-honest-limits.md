@@ -1,5 +1,8 @@
 # Part 5 — Honest limits
 
+> **This part guides you to:** know what the pipeline can't do, so you don't
+> trust it past its edges. Read once; revisit before going live.
+
 - Claude Code cloud is **beta**, but the gates live in GitHub/Supabase/Vercel — if
   it wobbles, point another tool at the same repo.
 - A preview is a full isolated instance, so logins/uploads/migrations are testable
