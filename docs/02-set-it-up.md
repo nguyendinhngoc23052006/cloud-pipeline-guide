@@ -138,7 +138,7 @@ You are the senior DevOps engineer and **orchestrator** of four tools as one sys
 ## Self-check
 - [ ] base = main; exactly one PR
 - [ ] ≤ 1 migration, UTC-timestamped latest; new tables have RLS; src/types matches
-- [ ] tests/lint/typecheck green; happy AND unhappy paths exercised
+- [ ] tests/lint/typecheck/e2e green; happy AND unhappy paths exercised
 - [ ] scripts still named exactly `lint`, `typecheck`, `test`, and `e2e`
 - [ ] key read via the two-prefix fallback chain; envPrefix consistent; nothing hardcoded; no secret in code
 - [ ] irreversible actions guarded + idempotent + flagged
@@ -479,7 +479,7 @@ helpers already exercise — not worth the extra toolchain.)
 
 *Note:* this is the human gate — Claude opens PRs but can't approve its own. It's
 last because it needs the checks the earlier steps created: `tests`/`lint`/
-`typecheck` come from step 8's workflow, **Supabase Preview** from step 5's
+`typecheck`/`e2e` come from step 8's workflows, **Supabase Preview** from step 5's
 branching, **Vercel** from step 6's import.
 
 **✓** a PR with a failing check won't merge; trying to merge without an approval

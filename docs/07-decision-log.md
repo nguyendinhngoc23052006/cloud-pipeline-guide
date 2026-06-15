@@ -45,7 +45,7 @@ needs annoying setup for marginal gain, leave it out.**
   copies clean themselves up). The old per-connection prefix setting and "sync to
   Preview" toggle no longer exist in the integration UI.
 - **Checks:** a `main` ruleset requires a PR + 1 approval + green checks (`tests`,
-  `lint`, `typecheck` from GitHub Actions, **Supabase Preview**, and **Vercel** —
+  `lint`, `typecheck`, `e2e` from GitHub Actions, **Supabase Preview**, and **Vercel** —
   picked under the picker's **Suggestions**, never **Vercel Preview Comments**).
   The approval is what stops Claude merging its own PR.
 - **Review is layered, opt-in past the floor:** the orchestrator dispatches an
