@@ -1,5 +1,9 @@
 # Part 3 — Ship a feature (daily)
 
+> **This part guides you to:** build a feature by describing it, then review its
+> preview and merge. Needs the whole of Part 2 in place. When a merge goes wrong,
+> Part 4 takes over.
+
 > This is where you live after setup. Two slots in, review the preview, merge.
 
 **Build:** in Claude Code (from `main`), describe the task in two slots — *<what

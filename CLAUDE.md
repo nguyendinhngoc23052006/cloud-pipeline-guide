@@ -96,6 +96,31 @@ A new approach may change *how* these are achieved; it may not remove any of the
 
 ---
 
+## The connected-line principle
+
+The guide is **one line**, read and built in order. Don't keep a static
+dependency map — it rots the moment a step moves. Keep the principle instead; it
+is the guard:
+
+1. **Strict order — later needs earlier.** Every part and every step depends on
+   all the ones before it; **nothing later works without what an earlier step
+   produced.** The `main` ruleset (step 9) needs the checks (step 8); the checks
+   need the app (step 4); the app needs the repo (step 1). So: do the steps in
+   their numbers, never reference a thing a later step creates as if it already
+   exists, and when you cite another part cite an *earlier* one.
+2. **Move together — never patch one pipe alone.** When you change any part, move
+   **every part that depends on it in the same PR.** The env-var contract spans
+   `vite.config.ts`, the client, `.env.example`, and the Vercel production names;
+   a renamed CI job moves both the workflow and the ruleset; a retired workaround
+   removes its code *and* its table row. If you can't move all of it, don't move
+   any of it yet.
+
+Together these mean the guide can be reorganized or extended freely, but never in
+a way that lets a later part stand without its earlier dependency, or lets one
+piece drift from the pieces wired to it.
+
+---
+
 ## How to work in this repo
 
 - **Keep the guide faithful to its own editing rules** (see the Decision log):
@@ -109,9 +134,9 @@ A new approach may change *how* these are achieved; it may not remove any of the
   an integration behavior) must be checked against the platform's **current
   official docs** before you edit it, and carry a dated *Verified* stamp. A stamp
   older than ~6 months is a question, not a fact.
-- **Change the whole connected line, never one pipe alone.** The pipeline is one
-  system; if you change the env-var contract, the framework, or a job name, move
-  every dependent part in the same change.
+- **Obey the connected-line principle** (above): later needs earlier, and a
+  change moves every dependent part in the same PR. This replaces any dependency
+  map — there is none to keep in sync.
 - **Propose, don't impose.** Make changes as reviewable PRs; explain what changed
   in plain English and how to undo it. The human decides.
 - **Be frugal with the human's attention.** Tell them the next single action.

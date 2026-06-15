@@ -32,16 +32,27 @@ and will walk you through the next single action and help you maintain the guide
 
 ## Contents
 
-| File | What it covers |
-|---|---|
-| [`docs/01-the-model.md`](docs/01-the-model.md) | Part 1 — the mental model and the five rules |
-| [`docs/02-set-it-up.md`](docs/02-set-it-up.md) | Part 2 — the 12 setup steps (one-time) |
-| [`docs/03-ship-a-feature-daily.md`](docs/03-ship-a-feature-daily.md) | Part 3 — the daily build/ship loop |
-| [`docs/04-when-something-breaks.md`](docs/04-when-something-breaks.md) | Part 4 — recovery and rollback |
-| [`docs/05-honest-limits.md`](docs/05-honest-limits.md) | Part 5 — what this can and can't do |
-| [`docs/06-keeping-it-current.md`](docs/06-keeping-it-current.md) | Maintenance, Verified stamps, the workaround table |
-| [`docs/07-decision-log.md`](docs/07-decision-log.md) | Why every choice was made (and what was rejected) |
-| [`CLAUDE.md`](CLAUDE.md) | Principles the AI follows when helping you |
+Each file names the one job it guides you through, so you can jump straight to it:
+
+| File | What it guides you to do | Go here when |
+|---|---|---|
+| [`docs/01-the-model.md`](docs/01-the-model.md) | Understand the pipeline and its five rules | first, before anything |
+| [`docs/02-set-it-up.md`](docs/02-set-it-up.md) | Wire the four tools together in 12 steps | building it the first time |
+| [`docs/03-ship-a-feature-daily.md`](docs/03-ship-a-feature-daily.md) | Build and ship a feature through a PR | every working day |
+| [`docs/04-when-something-breaks.md`](docs/04-when-something-breaks.md) | Roll back code, schema, data, or a payment | something broke after a merge |
+| [`docs/05-honest-limits.md`](docs/05-honest-limits.md) | Know what this can and can't do | setting expectations |
+| [`docs/06-keeping-it-current.md`](docs/06-keeping-it-current.md) | Add / update / delete / refresh any part | changing the pipeline later |
+| [`docs/07-decision-log.md`](docs/07-decision-log.md) | See why each choice was made (and rejected) | questioning a design choice |
+| [`CLAUDE.md`](CLAUDE.md) | (for the AI) the principles it follows here | — |
+
+## Read and build in order — each part needs the ones before it
+
+The pipeline is **one connected line**: nothing in a later part works without what
+an earlier part produced (the merge gate needs the checks; the checks need the
+app; the app needs the repo). So do Part 2's steps in their numbers, and when the
+guide changes, every dependent piece moves in the same change. There is no
+separate dependency map to keep in sync — that ordering *is* the rule. The AI
+enforces it; see [the connected-line principle in `CLAUDE.md`](CLAUDE.md#the-connected-line-principle).
 
 ## The plans you need
 

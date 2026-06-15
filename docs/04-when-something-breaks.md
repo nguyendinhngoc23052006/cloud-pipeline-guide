@@ -1,5 +1,9 @@
 # Part 4 — When something breaks
 
+> **This part guides you to:** pick the right undo when a merge causes trouble —
+> code, schema, data, or payment. Reached from Part 3's ✓ when a smoke-test
+> fails.
+
 *`/revert` routes you to the right fix.*
 
 - **Bad code:** roll back to the last good deployment — in Vercel, open
