@@ -12,7 +12,7 @@
   so the broken code can't redeploy.
 - **Bad schema:** tell Claude "write a migration that reverses PR #X" and ship
   that fix through a normal PR.
-- **Lost/corrupt data:** in Supabase, open database, then **Backups (PITR)** and restore the
+- **Lost/corrupt data:** in Supabase, open project's database, then **Backups (PITR)** and restore the
   database to a moment before the bad deploy. This rewinds *everything*, so it's
   the last resort.
 - **Payment:** reverse at the provider — refund/void/cancel.
