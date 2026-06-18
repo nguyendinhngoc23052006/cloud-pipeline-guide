@@ -131,6 +131,19 @@ needs annoying setup for marginal gain, leave it out.**
   branch breaks a live Claude Code session still working on it (a filed
   work-continuity bug). Cleanup is therefore **inactivity-only** (7+ days of no
   commits, no open PR) — recency, not merge status, is the safety signal.
+- **Merge discipline — field-corrected Jun 2026 (live incident).** A
+  presentational PR merged "green" yet production showed no change and was
+  reverted. Two causes, now reflected in Part 3's Ship note and step 9's ✓: (1)
+  the merge happened the moment the quick jobs passed, *before* the slower
+  **Supabase Preview** check had reported (it failed minutes later) — a
+  not-yet-reported check can't block a forced-early merge, and on that **private**
+  repo the ruleset wasn't hard-enforcing (Pro/Team only); (2) two edits committed
+  straight to `main` in the browser (the app's own `CLAUDE.md`) each triggered a
+  production build, and the older one promoted *after* the merge's build, so
+  production served the pre-merge tree. Fix is documentation-only — wait for every
+  check, never edit `main` directly. (The post-merge Supabase Preview failure
+  itself couldn't be root-caused — branch logs expire after 24h; the lingering
+  merged branch is the deliberate 7-day window above, not a fault.)
 - **Verified pass (Jun 2026, official docs):** Vercel's production branch moved to
   **Settings → Environments → Production → Branch Tracking** (vercel.com/docs/git).
   Vercel **Deployment Checks** (vercel.com/docs/deployment-checks) are a

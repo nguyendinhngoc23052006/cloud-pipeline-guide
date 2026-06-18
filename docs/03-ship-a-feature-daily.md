@@ -16,6 +16,15 @@ use *and* misuse the feature on the preview (never `main`'s URL) → when all gr
 and you're satisfied, **Approve → Merge**. A red check? Paste the error to Claude;
 it fixes the same PR. `/verify` walks this for you.
 
+*Two things that look done but aren't:* (1) the quick jobs (`tests`, `lint`,
+`typecheck`, `e2e`) go green seconds before **Supabase Preview** and **Vercel**
+report — merge only when **every** required check is green, or you ship code a
+slower check hadn't cleared (a "green" PR that a late check then fails is how a
+change reaches `main` ungated); (2) never edit a file directly on `main` — the
+file **Edit** pencil in GitHub, or any in-browser commit to `main`, builds its
+own production deploy that can promote *after* your merge and leave production
+serving the older code. Every change rides a `claude/…` PR.
+
 **First time you build…** (the dashboard half of a feature — each is a one-time
 click-path):
 - **auth:** **Supabase → Authentication → URL Configuration** — set the Site URL

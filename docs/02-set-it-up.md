@@ -483,7 +483,12 @@ last because it needs the checks the earlier steps created: `tests`/`lint`/
 branching, **Vercel** from step 6's import.
 
 **✓** a PR with a failing check won't merge; trying to merge without an approval
-is blocked.
+is blocked. *Two gotchas that quietly un-gate it:* on a **private** repo the
+ruleset binds only on GitHub **Pro/Team** (otherwise it's advisory — an early or
+direct-to-`main` push slips through; see the teammate upgrade below), and a check
+you never ticked (because it hadn't reported when you built the ruleset) isn't
+required — re-open the ruleset and add **Supabase Preview**/**Vercel** once they
+have each reported, or merges aren't gated on them.
 
 **↑ Upgrade — a second gate after merge (Vercel Deployment Checks):** the ruleset
 gates the *merge*; this gates the *release*. After a merge, Vercel builds
