@@ -181,9 +181,10 @@ You are the senior DevOps engineer and **orchestrator** of four tools as one sys
 *Note:* `CLAUDE.md` is the constitution Claude obeys; `MEMORY.md` is the notebook
 it learns into.
 
-*Customize it:* `CLAUDE.md` is read-only — to change a rule, paste *"propose a
-rule change: the rule whose job is `<…>`"* and Claude opens a PR you merge, never
-self-editing.
+*Customize it later:* `CLAUDE.md` is read-only — Claude proposes rule changes and
+you merge; it never self-edits. To change a rule after setup, see
+[Keeping it current → CLAUDE.md rules](06-keeping-it-current.md#claudemd-rules-the-project-constitution)
+— the place to go whenever you need to update anything in the pipeline.
 
 ## 4. Scaffold a thin baseline
 1. In Claude Code, paste this:
@@ -210,18 +211,6 @@ cleanly. It's deliberately bare — auth, storage, and tables arrive later as th
 own feature PRs. This first merge happens before the gates exist — it's the
 one-time bootstrap (templated projects from step 12 skip this: their gate is up
 from the first minute).
-
-*Different framework?* This guide is written for **Vite** — the right choice for
-anything behind a login (no SEO need). For a public, SEO-driven site you'd use an
-SSR or static-site framework (Next, Astro) instead. Two things in the guide then
-change, nothing else: **(a) this step's scaffold prompt** — tell Claude your
-framework and have it generate that framework's config and a server/client
-Supabase split instead of `vite.config.ts` + the browser singleton, and drop
-`vercel.json` — its catch-all rewrite is Vite-SPA-specific, and an SSR or
-multi-page framework doesn't need it; and **(b) step 6.2** — set the production
-variable names to the framework's public prefix (`NEXT_PUBLIC_…`, Astro/SvelteKit
-`PUBLIC_…`) instead of `VITE_…`. The framework is a one-time choice made here at
-setup, not something you switch later.
 
 ## 5. Set up Supabase
 1. supabase.com → **New project**; **choose your GitHub repo when prompted**; save
@@ -252,15 +241,14 @@ branching on. If it says production has migrations the repo lacks, the project
 wasn't empty — make a fresh one.
 
 ## 6. Set up Vercel (and connect it to Supabase)
-1. vercel.com → **Add New → Project →** import your repo (Vite is auto-detected —
-   a different framework is auto-detected the same way, so there's nothing to set
-   here); click **Deploy** without adding anything else (the build is green; the
-   page errors at runtime until the variables exist — expected).
+1. vercel.com → **Add New → Project →** import your repo (Vite is auto-detected, so
+   there's nothing to set here); click **Deploy** without adding anything else (the
+   build is green; the page errors at runtime until the variables exist —
+   expected).
 2. **Settings → Environment Variables →** add `VITE_SUPABASE_URL` and
    `VITE_SUPABASE_PUBLISHABLE_KEY` (the two values you copied), selecting
    **Production** as the only environment for each; then open **Deployments** and
-   on the newest one click **⋯ → Redeploy**. *(Different framework? Use your
-   framework's public prefix here instead of `VITE_` — see the note at step 4.)*
+   on the newest one click **⋯ → Redeploy**.
 3. **Settings → Environments → Production →** under **Branch Tracking**, make sure
    the branch is **`main`** (the default for new projects).
 4. **Settings → Deployment Protection →** make sure **Vercel Authentication** is
@@ -336,17 +324,20 @@ output, and is the only one that commits; it records each reviewer's verdict to
 memory automatic: load `MEMORY.md` at session start, and don't let a task end
 until the self-check ran, the reviewers ran, and a lesson was recorded.
 
-*Customize it:* to change the swarm, paste *"add/update/delete the agent (or
-hook) whose job is `<…>`"* — Claude names the exact target and confirms before
-deleting, and never drops below the three reviewers.
+*Customize it later:* to change the review swarm or the hooks, see
+[Keeping it current → Reviewer agents](06-keeping-it-current.md#reviewer-agents--the-researcher-worker)
+and [→ Self-improvement hooks](06-keeping-it-current.md#self-improvement-hooks) —
+Claude names the exact target and confirms before deleting, and never drops below
+the three reviewers.
 
 **↑ Upgrade — give Claude eyes (read-only):** one prompt — `Add the github,
 supabase, and vercel MCP servers to .mcp.json (project scope, committed),
 read-only/observability ONLY: scope the Supabase server to this project, set its
 read-only flag, never write/deploy/merge. Open a PR into main.` — then authorize
 each in-browser. Now Claude can read logs, schema, and issues to debug, while
-still unable to change production. *Customize it:* paste *"add/update/delete the
-MCP server whose job is `<…>`"* — read-only/observability only.
+still unable to change production. *Customize it later:* see
+[Keeping it current → MCP servers](06-keeping-it-current.md#mcp-servers-read-only-eyes)
+— read-only/observability only.
 
 ## 8. Add the repo's workflows
 1. Paste this for the CI gate:
@@ -374,10 +365,16 @@ Add a permanent GET /health route that does one cheap Supabase round-trip needin
 
 5. Point the uptime monitor at production so it starts watching — the workflow
    you just added in step 8.4 ships **dormant** and no-ops until this variable
-   exists (that's also why a fresh templated repo stays green). The production
-   domain came from step 6: **Settings → Secrets and variables → Actions →
-   Variables → New repository variable** → name `PRODUCTION_URL`, value your
-   production URL.
+   exists (that's also why a fresh templated repo stays green). `PRODUCTION_URL` is
+   your **Vercel** production URL — the public address of your deployed app (its
+   `*.vercel.app` domain or your custom domain, the one **Deployments → Visit**
+   opens), **not** the Supabase project URL. `/health` is a route *on your app*
+   that makes the Supabase call server-side, so the monitor must hit the app: paste
+   the Supabase URL by mistake and `…supabase.co/health` answers **"No API key
+   found in request"** (that's Supabase's API gateway, not your app) and the
+   monitor files a false outage. Set it in GitHub: **Settings → Secrets and
+   variables → Actions → Variables → New repository variable** → name
+   `PRODUCTION_URL`, value that Vercel URL.
 6. Paste this for the E2E gate (your cloud env must already allow
    `cdn.playwright.dev` — step 2.3):
 
@@ -403,8 +400,9 @@ a live Claude Code session is still working on breaks the session — a week of
 silence is the only safe signal a branch is abandoned. `main` is never touched;
 Supabase preview branches clean themselves.
 
-*Customize it:* paste *"add/update/delete the workflow whose job is `<…>`"* —
-renaming a required job means reselecting it in the ruleset (step 9).
+*Customize it later:* see
+[Keeping it current → Workflows](06-keeping-it-current.md#workflows-ci-and-the-gates)
+— renaming a required job means reselecting it in the ruleset (step 9).
 
 **↑ Upgrade — independent review on every PR:** the in-build swarm reviews
 Claude's own work; this adds a *separate* reviewer on the PR itself. Get an API
@@ -542,8 +540,9 @@ Create .claude/skills/revert/SKILL.md with YAML frontmatter (name: revert; descr
 *Note:* each turns a recurring job into one verb (`/name`), and Claude can also
 invoke it on its own when relevant.
 
-*Customize it:* paste *"add/update/delete the skill whose job is `<…>`"* — invoked
-as `/name`.
+*Customize it later:* see
+[Keeping it current → Command skills](06-keeping-it-current.md#command-skills) —
+each is invoked as `/name`.
 
 ## 11. Lay out your project structure
 1. In Claude Code, run `/prototype <what it is · who uses it · core entities ·

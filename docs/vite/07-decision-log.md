@@ -82,10 +82,13 @@ needs annoying setup for marginal gain, leave it out.**
   *omitted* the model param (omit = inherit); the rule was right, the dispatch was
   not — fixed by always passing the lower tier.
 - **Structural change is intent-addressed and confirm-gated.** The resolve→confirm
-  protocol lives once in `CLAUDE.md`, mirrored as a one-line *Customize it* prompt
-  under each part's setup step; a CRUD request must resolve to the named file and
-  confirm before deleting, so it can't take out the wrong component, and the Stop
-  hook hard-protects the three-reviewer floor by filename. Kept separate from the
+  protocol lives once in `CLAUDE.md` and in full in "Keeping it current"; each
+  part's setup step carries a one-line *Customize it later* pointer to the matching
+  "Keeping it current" section rather than restating the prompt, so the management
+  prompts live in exactly one place and can't drift from their setup step. A CRUD
+  request must resolve to the named file and confirm before deleting, so it can't
+  take out the wrong component, and the Stop hook hard-protects the three-reviewer
+  floor by filename. Kept separate from the
   currency/update prompt by **verb, not addressing**: both resolve my intent to
   the named file and confirm, but currency only *refreshes an existing part to
   current docs* while CRUD *adds, changes, or removes* one.

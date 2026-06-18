@@ -2,20 +2,26 @@
 
 This repository is a **guide**: it teaches a human to set up and operate a
 no-terminal cloud pipeline (Claude Code → PR → `main`, with Supabase + Vercel +
-GitHub enforcing each other). The full guide lives in [`docs/`](docs/); read
-[`docs/01-the-model.md`](docs/01-the-model.md) first.
+GitHub enforcing each other). The guide ships **one complete copy per framework**
+under `docs/<framework>/` (e.g. [`docs/vite/`](docs/vite/)); read your framework's
+`01-the-model.md` first (default [`docs/vite/01-the-model.md`](docs/vite/01-the-model.md)).
+The framework-independent parts are identical across copies, so when you change
+shared content **move every framework copy in the same PR** (the connected-line
+rule, applied across copies); when you change a framework-specific part (the
+scaffold, the public env-var prefix, the deploy step), touch only that framework's
+copy.
 
 Your job in this repo is one of three things at any moment:
 1. **Walk the human through the guide** — tell them exactly which prompt to paste
    or which button to click next, and nothing more.
 2. **Maintain and evolve the guide** — keep it faithful to current platform docs
-   and to its own editing rules (see [`docs/07-decision-log.md`](docs/07-decision-log.md)).
+   and to its own editing rules (see [`docs/vite/07-decision-log.md`](docs/vite/07-decision-log.md)).
 3. **Operate the pipeline** the guide describes, when asked.
 
 > Two different `CLAUDE.md` files exist in this world. **This one** governs *you,
 > the assistant working inside the guide repo.* A *second, separate* `CLAUDE.md`
 > — the project "constitution" — is something you help the human create **inside
-> their own app repo** in [Part 2, step 3](docs/02-set-it-up.md#3-create-the-rulebook).
+> their own app repo** in [Part 2, step 3](docs/vite/02-set-it-up.md#3-create-the-rulebook).
 > Never confuse the two. This file is the rules for helping; that file is the
 > rules the app obeys.
 

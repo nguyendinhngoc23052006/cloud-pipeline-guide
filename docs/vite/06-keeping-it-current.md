@@ -112,13 +112,15 @@ optional `claude-review.yml`, `canary.yml`).
 <Add|Update|Delete> the MCP server whose job is <…>. Resolve my intent to the exact entry in .mcp.json and restate it; if it matches none or several, ask first; confirm before any delete. MCP servers are read-only/observability ONLY — never write, deploy, or merge to production; scope the Supabase server to this project and keep its read-only flag. Open ONE PR into main with the Self-check and the "For you" block.
 ```
 
-### The env-name contract (only when you swap framework)
+### The env-name contract
 *Spans `vite.config.ts` (`envPrefix`), `src/lib/supabaseClient.ts`,
 `.env.example`, and the Vercel **Production** variable names · set in steps 1, 4,
-and 6.* This is the textbook connected line — move all of it or none of it.
+and 6.* The textbook connected line: these four name the same two values (`VITE_…`
+in production, the integration's injected `NEXT_PUBLIC_…` in previews), so a change
+to any one moves all of them or none.
 
 ```text
-Update the env-name contract to <framework / new public prefix>. Move ALL of it in ONE PR: vite.config.ts envPrefix, src/lib/supabaseClient.ts fallback chain, .env.example, and the names I set in Vercel Production — and drop vercel.json's SPA rewrite if the new framework doesn't need it. In the "For you" block, give me the exact Vercel dashboard clicks to rename the Production variables. Open ONE PR into main with the Self-check.
+Change the env-name contract: <what you're changing>. Move ALL of it in ONE PR: vite.config.ts envPrefix, src/lib/supabaseClient.ts fallback chain, .env.example, and the names I set in Vercel Production. In the "For you" block, give me the exact Vercel dashboard clicks for any Production-variable rename. Open ONE PR into main with the Self-check.
 ```
 
 ---

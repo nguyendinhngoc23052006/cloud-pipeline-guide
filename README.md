@@ -17,11 +17,23 @@ A human who can paste a prompt, click a button, and copy a key from a dashboard 
 and wants to do nothing else. No local setup, no CLI, no command line, ever. That
 constraint is the whole point; see [`CLAUDE.md`](CLAUDE.md).
 
+## Choose your framework
+
+This guide ships **one complete copy per framework** — pick yours and follow it
+end to end; you never need another framework's copy. Every copy has the same seven
+parts in the same order; only the framework-specific pieces (the scaffold, the
+public env-var prefix, the deploy specifics) differ.
+
+- **[Vite + React](docs/vite/01-the-model.md)** — apps behind a login (no SEO
+  need). The default; choose it if you're unsure.
+- **Next.js**, **Astro**, **SvelteKit** — guides being added under `docs/` for
+  SEO-driven and full-stack-framework apps.
+
 ## How to use this repo
 
-1. Read [**Part 1 — The model**](docs/01-the-model.md) once.
-2. Do [**Part 2 — Set it up**](docs/02-set-it-up.md) once, top to bottom.
-3. Then live in [**Part 3 — Ship a feature (daily)**](docs/03-ship-a-feature-daily.md).
+1. Read **Part 1 — The model** once.
+2. Do **Part 2 — Set it up** once, top to bottom.
+3. Then live in **Part 3 — Ship a feature (daily)**.
 
 In every step the **numbered lines are the actions**; the italic *note* under
 them is the one thing worth knowing. **↑ Upgrade** notes are optional add-ons you
@@ -32,17 +44,18 @@ and will walk you through the next single action and help you maintain the guide
 
 ## Contents
 
-Each file names the one job it guides you through, so you can jump straight to it:
+Each framework's guide has the same seven parts (paths below shown for Vite — swap
+`vite/` for your framework's folder):
 
 | File | What it guides you to do | Go here when |
 |---|---|---|
-| [`docs/01-the-model.md`](docs/01-the-model.md) | Understand the pipeline and its five rules | first, before anything |
-| [`docs/02-set-it-up.md`](docs/02-set-it-up.md) | Wire the four tools together in 12 steps | building it the first time |
-| [`docs/03-ship-a-feature-daily.md`](docs/03-ship-a-feature-daily.md) | Build and ship a feature through a PR | every working day |
-| [`docs/04-when-something-breaks.md`](docs/04-when-something-breaks.md) | Roll back code, schema, data, or a payment | something broke after a merge |
-| [`docs/05-honest-limits.md`](docs/05-honest-limits.md) | Know what this can and can't do | setting expectations |
-| [`docs/06-keeping-it-current.md`](docs/06-keeping-it-current.md) | Add / update / delete / refresh any part | changing the pipeline later |
-| [`docs/07-decision-log.md`](docs/07-decision-log.md) | See why each choice was made (and rejected) | questioning a design choice |
+| [`docs/vite/01-the-model.md`](docs/vite/01-the-model.md) | Understand the pipeline and its five rules | first, before anything |
+| [`docs/vite/02-set-it-up.md`](docs/vite/02-set-it-up.md) | Wire the four tools together in 12 steps | building it the first time |
+| [`docs/vite/03-ship-a-feature-daily.md`](docs/vite/03-ship-a-feature-daily.md) | Build and ship a feature through a PR | every working day |
+| [`docs/vite/04-when-something-breaks.md`](docs/vite/04-when-something-breaks.md) | Roll back code, schema, data, or a payment | something broke after a merge |
+| [`docs/vite/05-honest-limits.md`](docs/vite/05-honest-limits.md) | Know what this can and can't do | setting expectations |
+| [`docs/vite/06-keeping-it-current.md`](docs/vite/06-keeping-it-current.md) | Add / update / delete / refresh any part | changing the pipeline later |
+| [`docs/vite/07-decision-log.md`](docs/vite/07-decision-log.md) | See why each choice was made (and rejected) | questioning a design choice |
 | [`CLAUDE.md`](CLAUDE.md) | (for the AI) the principles it follows here | — |
 
 ## Read and build in order — each part needs the ones before it
