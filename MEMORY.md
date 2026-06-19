@@ -24,8 +24,9 @@ start of every task, and record decisions, root causes, and gotchas as you go.
     read `VITE_ ?? NEXT_PUBLIC_`.
   - **Next.js**: native `NEXT_PUBLIC_` — production AND preview share these names, so
     NO fallback and NO envPrefix; the Vite workaround does not exist here.
-  - **Astro**: native `PUBLIC_`; bridge via `astro.config.mjs` `vite.envPrefix:
-    ['PUBLIC_','NEXT_PUBLIC_']`, read `PUBLIC_ ?? NEXT_PUBLIC_`.
+  - **Astro**: native `PUBLIC_`; the SERVER (middleware) resolves `PUBLIC_ ?? NEXT_PUBLIC_`
+    from `process.env` and passes public values to islands — NO `vite.envPrefix` (that
+    override has a known Astro breakage, issue #10406).
   - **SvelteKit**: native `PUBLIC_`, but its public `$env` takes one prefix — resolve
     `PUBLIC_ ?? NEXT_PUBLIC_` on the SERVER (hooks.server.ts) and pass the values to
     the browser via the root layout load.
@@ -37,7 +38,14 @@ start of every task, and record decisions, root causes, and gotchas as you go.
 - Dispatch the three reviewers + the currency-researcher before any content PR;
   record verdicts to `.claude/review/`.
 
-## Open / to re-verify
-- The `next/`, `astro/`, `sveltekit/` env-wiring was written from established
-  `@supabase/ssr` patterns and still needs a first official-docs verification pass
-  (the org spend limit blocked live web verification at authoring time).
+## Verified / open
+- Framework env-wiring **verified Jun 2026** (currency-researcher, official docs):
+  Next.js ✓, SvelteKit ✓, Astro ✓ (after correcting its draft — the `vite.envPrefix`
+  bridge has a known Astro breakage #10406, replaced by server-side resolution).
+- **Open currency items (shared — for a follow-up refresh, affect the merged Vite copy too):**
+  (1) Supabase is renaming `anon`→`sb_publishable_…`; post-Nov-2025 projects lack the
+  legacy anon key, and the Vercel integration's injection of the new name has open bug
+  #38984 — the client's `…PUBLISHABLE_KEY ?? …ANON_KEY` read covers both today.
+  (2) A search snippet suggests the integration's injected prefix may be configurable in
+  the Supabase dashboard (direct doc fetch 403'd) — would retire the bridge workaround, but
+  CONFLICTS with the field-verified "fixed names" claim, so re-verify before acting.

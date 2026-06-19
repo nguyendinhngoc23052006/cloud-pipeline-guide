@@ -208,8 +208,7 @@ needs annoying setup for marginal gain, leave it out.**
   causes — edited migrations silently skipped, sibling previews stranded by a
   merge, hand edits to production — are each blocked by an existing rule: never edit
   a merged migration, one schema change in flight, never touch a DB by hand.
-- **Next.js copy — framework deltas (drafted Jun 2026; pending a `currency-researcher`
-  official-docs pass).** This is the Next.js edition of the guide. What differs from the
+- **Next.js copy — framework deltas (Verified Jun 2026, official docs).** This is the Next.js edition of the guide. What differs from the
   Vite baseline, and why: the public prefix is `NEXT_PUBLIC_`, which Next exposes to the
   browser natively AND which is exactly what the Supabase→Vercel integration injects into
   previews — so production and previews share one set of names and the Vite two-prefix
@@ -219,7 +218,11 @@ needs annoying setup for marginal gain, leave it out.**
   reading cookies, with `middleware.ts` refreshing the session — instead of a single
   browser singleton; there is **no `vercel.json`** (Vercel builds Next natively; the SPA
   catch-all rewrite is Vite-only); Edge-function `npm:` aliasing lives in
-  `vitest.config.ts`. These framework facts were written from the established
-  `@supabase/ssr` Next.js setup and still need their first verification against current
-  Supabase / Vercel / Next official docs — `currency-researcher` should confirm each and
-  re-stamp it (tracked in the repo `MEMORY.md`).
+  `vitest.config.ts`. Verified against nextjs.org/docs (any `NEXT_PUBLIC_`-prefixed var is
+  browser-native, no config), supabase.com/docs/guides/auth/server-side/nextjs
+  (createBrowserClient + createServerClient with `cookies()` getAll/setAll + middleware),
+  and Vercel's zero-config Next detection. *(Open currency note shared by all copies:
+  Supabase is renaming the `anon` key to `sb_publishable_…` — projects after Nov 2025 lack
+  the legacy anon key and the integration's injection of the new name has an open bug
+  (#38984); the client's `…PUBLISHABLE_KEY ?? …ANON_KEY` read covers both. Tracked in
+  MEMORY.md.)*

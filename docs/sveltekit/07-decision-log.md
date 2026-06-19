@@ -208,8 +208,7 @@ needs annoying setup for marginal gain, leave it out.**
   causes — edited migrations silently skipped, sibling previews stranded by a
   merge, hand edits to production — are each blocked by an existing rule: never edit
   a merged migration, one schema change in flight, never touch a DB by hand.
-- **SvelteKit copy — framework deltas (drafted Jun 2026; pending a `currency-researcher`
-  official-docs pass).** This is the SvelteKit edition (`@sveltejs/adapter-vercel`). What
+- **SvelteKit copy — framework deltas (Verified Jun 2026, official docs).** This is the SvelteKit edition (`@sveltejs/adapter-vercel`). What
   differs from the Vite baseline, and why: the browser prefix is `PUBLIC_`, but
   SvelteKit's public `$env` exposes a SINGLE prefix, so it can't list both `PUBLIC_` and
   the integration's injected `NEXT_PUBLIC_`. The fix is to resolve `PUBLIC_ ?? NEXT_PUBLIC_`
@@ -219,8 +218,12 @@ needs annoying setup for marginal gain, leave it out.**
   load; the browser client is built from that load data, never from a client-exposed
   prefix. Supabase uses `@supabase/ssr` (server client on `event.locals` + a browser
   client in `+layout.ts`); there is **no `vercel.json`** (the adapter handles routing);
-  Edge-function `npm:` aliasing stays in `vite.config.ts` (SvelteKit has one). These
-  framework facts were written from the established `@supabase/ssr` SvelteKit setup and
-  still need their first verification against current Supabase / Vercel / SvelteKit
-  official docs — `currency-researcher` should confirm each (especially how SvelteKit
-  classifies a `NEXT_PUBLIC_`-named var) and re-stamp it (tracked in the repo `MEMORY.md`).
+  Edge-function `npm:` aliasing stays in `vite.config.ts` (SvelteKit has one). Verified
+  against svelte.dev/docs/kit/$env-dynamic-public and $env-dynamic-private (a
+  `NEXT_PUBLIC_`-named var doesn't match `publicPrefix`, so SvelteKit treats it as private/
+  server-only — confirming the server-resolve approach),
+  supabase.com/docs/guides/auth/server-side/sveltekit (hooks.server.ts + event.cookies +
+  locals + +layout pattern), and svelte.dev/docs/kit/adapter-vercel (zero-config, no
+  vercel.json). *(Open currency note shared by all copies: the `anon`→`sb_publishable_…`
+  key rename; the client's `…PUBLISHABLE_KEY ?? …ANON_KEY` read covers both. Tracked in
+  MEMORY.md.)*

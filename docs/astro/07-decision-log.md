@@ -38,13 +38,14 @@ needs annoying setup for marginal gain, leave it out.**
   schema onto every new project. Templates copy files, not settings — so the
   ruleset rides as committed JSON (one-click import) and the dashboards are redone
   per project.
-- **Env-var seam:** the client reads `PUBLIC_` names first (set by hand,
-  Production-scoped) with a `NEXT_PUBLIC_` fallback (the integration's fixed injected
-  names for previews); `astro.config.mjs`'s `vite.envPrefix: ['PUBLIC_','NEXT_PUBLIC_']`
-  exposes both to the browser; only **Production**-scoped secrets are deleted from
-  Vercel by hand (the integration's branch-scoped preview copies clean themselves up).
-  The old per-connection prefix setting and "sync to Preview" toggle no longer exist
-  in the integration UI.
+- **Env-var seam:** Astro reaches Supabase on the server, so `src/middleware.ts`
+  resolves `PUBLIC_` names first (set by hand, Production-scoped) with a `NEXT_PUBLIC_`
+  fallback (the integration's fixed injected names for previews) from `process.env` —
+  no `vite.envPrefix` override (that has a known Astro breakage, issue #10406); a client
+  island gets the public values passed from the server. Only **Production**-scoped
+  secrets are deleted from Vercel by hand (the integration's branch-scoped preview
+  copies clean themselves up). The old per-connection prefix setting and "sync to
+  Preview" toggle no longer exist in the integration UI.
 - **Checks:** a `main` ruleset requires a PR + 1 approval + green checks (`tests`,
   `lint`, `typecheck`, `e2e` from GitHub Actions, **Supabase Preview**, and **Vercel** —
   picked under the picker's **Suggestions**, never **Vercel Preview Comments**).
@@ -207,19 +208,21 @@ needs annoying setup for marginal gain, leave it out.**
   causes — edited migrations silently skipped, sibling previews stranded by a
   merge, hand edits to production — are each blocked by an existing rule: never edit
   a merged migration, one schema change in flight, never touch a DB by hand.
-- **Astro copy — framework deltas (drafted Jun 2026; pending a `currency-researcher`
-  official-docs pass).** This is the Astro edition (SSR via `output: 'server'` + the
-  `@astrojs/vercel` adapter). What differs from the Vite baseline: the browser prefix is
-  `PUBLIC_`, and because Astro builds on Vite the preview-injected `NEXT_PUBLIC_` names
-  are exposed by adding them to `astro.config.mjs`'s `vite.envPrefix:
-  ['PUBLIC_','NEXT_PUBLIC_']` — so the two-prefix fallback workaround survives, just
-  relocated from `vite.config.ts` to `astro.config.mjs`. Supabase is reached through
-  `@supabase/ssr` — a server client built in `src/middleware.ts` from `context.cookies`
-  and stored on `context.locals`, plus a browser client for islands — instead of a
-  single browser singleton; there is **no `vercel.json`** (the adapter handles routing;
-  the SPA catch-all rewrite is Vite-only); Edge-function `npm:` aliasing can live in the
-  Vitest config or `astro.config.mjs`'s `vite` key. These framework facts were written
-  from the established `@supabase/ssr` Astro setup and still need their first
-  verification against current Supabase / Vercel / Astro official docs —
-  `currency-researcher` should confirm each and re-stamp it (tracked in the repo
-  `MEMORY.md`).
+- **Astro copy — framework deltas (Verified Jun 2026, official docs).** This is the
+  Astro edition (SSR via `output: 'server'` + the `@astrojs/vercel` adapter). Supabase is
+  reached on the SERVER: `src/middleware.ts` builds the `@supabase/ssr` server client from
+  `context.cookies` and stores it on `context.locals`, resolving `PUBLIC_ ?? NEXT_PUBLIC_`
+  from `process.env` (the server sees every variable regardless of prefix); a client
+  island that needs Supabase gets the public URL + key passed from the server. **Why not
+  `vite.envPrefix`:** an earlier draft exposed the injected `NEXT_PUBLIC_` names to the
+  browser via `astro.config.mjs`'s `vite.envPrefix`, but custom `envPrefix` overrides have
+  a known Astro breakage (issue #10406, closed *not planned*) — the server-side resolve
+  avoids it. There is **no `vercel.json`** (the adapter handles routing). Verified against
+  docs.astro.build/en/guides/environment-variables (`PUBLIC_` is the browser prefix),
+  github.com/withastro/astro/issues/10406 (envPrefix breakage),
+  supabase.com/docs/guides/auth/quickstarts/astrojs (middleware + cookies pattern), and
+  docs.astro.build/en/guides/deploy/vercel (SSR adapter, no vercel.json). *(Open currency
+  note shared by all copies: Supabase is renaming the `anon` key to `sb_publishable_…` —
+  projects created after Nov 2025 lack the legacy anon key, and the Vercel integration's
+  injection of the new name has an open bug (#38984); the client's
+  `…PUBLISHABLE_KEY ?? …ANON_KEY` read already covers both. Tracked in MEMORY.md.)*

@@ -40,15 +40,15 @@ throwaway `claude/…` branch that becomes a PR.
   bad builds, Supabase rebuilds from the files, and a committed Stop hook polices
   Claude's own checklist locally.
 
-**The env-var names are a contract.** The browser only sees variables carrying a
-public prefix Astro exposes (`vite.envPrefix` in `astro.config.mjs`). This stack
-exposes two: `PUBLIC_` for the values you set by hand in Vercel (production), and
-`NEXT_PUBLIC_` for the values the Supabase integration injects into previews (its
-fixed names — there is no setting to change them). The client reads `PUBLIC_` first
-and falls back to `NEXT_PUBLIC_`. The contract lives in `astro.config.mjs`
-(`vite.envPrefix`), the Supabase client (`src/lib/supabase.ts`), `.env.example`, and
-the Vercel production variable names — these four name the same two values, so a
-change to any one moves all of them in one PR.
+**The env-var names are a contract.** Astro reaches Supabase on the SERVER (its SSR
+middleware sees every variable regardless of prefix), so it resolves
+`PUBLIC_SUPABASE_URL ?? NEXT_PUBLIC_SUPABASE_URL` (and the key) from `process.env`
+directly — `PUBLIC_` is what you set by hand in Vercel (production), `NEXT_PUBLIC_` is
+what the Supabase integration injects into previews. No `vite.envPrefix` bridge is
+needed; a client island that needs Supabase gets the public URL + key passed down from
+the server. The contract lives in the Supabase client + `src/middleware.ts`,
+`.env.example`, and the Vercel production variable names — these name the same two
+values, so a change to any one moves all of them in one PR.
 
 **One collision to remember:** Vercel **"Preview"** (a variable *scope*) is not a
 PR's **preview** (its live URL).

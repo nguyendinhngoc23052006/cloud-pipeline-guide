@@ -113,14 +113,14 @@ optional `claude-review.yml`, `canary.yml`).
 ```
 
 ### The env-name contract
-*Spans `astro.config.mjs` (`vite.envPrefix`), the Supabase client
-(`src/lib/supabase.ts`), `.env.example`, and the Vercel **Production** variable names
-· set in steps 1, 4, and 6.* The textbook connected line: these four name the same
-two values (`PUBLIC_…` in production, the integration's injected `NEXT_PUBLIC_…` in
-previews), so a change to any one moves all of them or none.
+*Spans the Supabase client + `src/middleware.ts`, `.env.example`, and the Vercel
+**Production** variable names · set in steps 1, 4, and 6.* The textbook connected line:
+these name the same two values (`PUBLIC_…` in production, the integration's injected
+`NEXT_PUBLIC_…` in previews), resolved server-side, so a change to any one moves all of
+them or none.
 
 ```text
-Change the env-name contract: <what you're changing>. Move ALL of it in ONE PR: astro.config.mjs vite.envPrefix, the Supabase client's fallback, .env.example, and the names I set in Vercel Production. In the "For you" block, give me the exact Vercel dashboard clicks for any Production-variable rename. Open ONE PR into main with the Self-check.
+Change the env-name contract: <what you're changing>. Move ALL of it in ONE PR: the server-side resolver (src/middleware.ts + the Supabase client), .env.example, and the names I set in Vercel Production. In the "For you" block, give me the exact Vercel dashboard clicks for any Production-variable rename. Open ONE PR into main with the Self-check.
 ```
 
 ---
@@ -157,7 +157,7 @@ Delete the workaround whose job is <…>: confirm its Retire-when condition is m
 
 | Workaround | Retire when… | Then | Verified |
 |---|---|---|---|
-| `PUBLIC_ ?? NEXT_PUBLIC_` fallback in the Supabase client + the extra `NEXT_PUBLIC_` entry in `astro.config.mjs`'s `vite.envPrefix` | the Supabase→Vercel integration lets you choose the injected variable names (so previews can receive `PUBLIC_…PUBLISHABLE_KEY`) | read only the `PUBLIC_` names and drop `NEXT_PUBLIC_` from `vite.envPrefix` | drafted Jun 2026, pending verify |
+| server-side `PUBLIC_ ?? NEXT_PUBLIC_` resolution in `src/middleware.ts` (public values passed to islands) | the Supabase→Vercel integration lets you choose the injected variable names (so it injects `PUBLIC_…` directly) | read only the `PUBLIC_` names server-side | docs, Jun 2026 |
 | close/reopen the PR to retrigger env sync after fixing a connection | the integration syncs on push/branch creation, not only at PR-open | drop the reopen instruction from step 6's ✗ | field, Jun 2026 |
 | auth-seed SQL (GoTrue token columns written `''`, never NULL) + `signUp()` fallback (when you build auth) | Supabase ships **working** preview-branch user creation via the Admin API | seed via the Admin API | field (observed bug — a NULL token column logs in as "Database error querying schema"), Jun 2026 |
 | SessionStart hook loading the repo's committed `MEMORY.md` | Claude Code's native **auto memory** (v2.1.59+) syncs across machines — today it is explicitly **machine-local and not shared with cloud environments**, so every fresh cloud sandbox starts amnesiac without the committed file | move repo lessons into native memory and drop the hook | docs, Jun 2026 |
