@@ -7,7 +7,7 @@ start of every task, and record decisions, root causes, and gotchas as you go.
 
 ## Structure
 - The guide ships one complete copy per framework under `docs/<framework>/`:
-  `vite/` (the default, done), and `next/`, `astro/`, `sveltekit/` (in progress).
+  `vite/` (default), `next/`, `astro/`, `sveltekit/` — all four built.
 - Parts 03/04/05 are byte-identical across copies; Parts 01/02/06/07 carry the
   framework-specific deltas. The root `README.md` is the framework chooser.
 

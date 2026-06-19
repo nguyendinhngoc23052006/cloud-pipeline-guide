@@ -30,7 +30,8 @@ public env-var prefix, the deploy specifics) differ.
   (App Router + `@supabase/ssr`).
 - **[Astro](docs/astro/01-the-model.md)** — content/SSR sites with islands
   (`@astrojs/vercel` + `@supabase/ssr`).
-- **SvelteKit** — guide being added under `docs/`.
+- **[SvelteKit](docs/sveltekit/01-the-model.md)** — full-stack Svelte apps
+  (`@sveltejs/adapter-vercel` + `@supabase/ssr`).
 
 ## How to use this repo
 
