@@ -147,3 +147,69 @@ piece drift from the pieces wired to it.
   in plain English and how to undo it. The human decides.
 - **Be frugal with the human's attention.** Tell them the next single action.
   Don't surface options you won't pursue; recommend, then proceed.
+
+---
+
+## The working protocol — your quality gate
+
+This guide is maintained for the long haul; this protocol keeps it **current,
+fact-validated, and drift-free**. You are the **orchestrator** — lesser-tier agents
+read and draft, only you fix and commit — and **every change is ONE reviewable PR**
+that clears the gate at the end of this section.
+
+**Start each task** by reading `MEMORY.md` (the SessionStart hook prints it) and the
+relevant folder `CLAUDE.md`, then restating the goal. Say up front if the task
+touches more than one framework copy or any platform claim.
+
+**The four kinds of work** — each ends in one PR through the gate:
+- **Add** (a part, framework copy, agent, or ↑ Upgrade): place it where the connected
+  line puts it (later needs earlier); if it's shared content, add it to *every*
+  framework copy in the same PR.
+- **Fix** (an error or rough edge): surgical — change only what the task needs; fix
+  shared prose in *all* copies at once.
+- **Research** (answer a question / validate a claim): dispatch `currency-researcher`
+  to read the **current official docs** — never answer a platform question from
+  memory.
+- **Delete** (a part, agent, or upgrade): resolve the intent to the exact named file
+  and restate it; confirm before deleting; never drop below the three-reviewer floor;
+  name and move whatever depended on it.
+
+**Never assume — verify.** Any platform claim (dashboard path, default, integration
+behavior, version, API shape) is checked against the platform's **current official
+documentation** before you write it and carries a dated **Verified** stamp; a stamp
+older than ~6 months is re-verified, not trusted. If you can't reach the docs, change
+nothing and say so.
+
+**No drift.** Shared content is byte-identical across every `docs/<framework>/` copy —
+move it in all copies or none. When you change a pipe, move its dependents in the same
+PR (the env-name contract; a CI job name ↔ the ruleset; a renamed step cited
+elsewhere), and keep step numbers, headings, filenames, and anchors parallel across
+copies.
+
+**Agents — the same logic the guide teaches.** They live in `.claude/agents/`
+(committed), each with a proactive `description`, a `.memory.md` sidecar, and **no
+model named**: you resolve "a tier below me" from your live in-context lineup and pass
+the `model` **explicitly** at dispatch (omitting it silently runs the work on your own
+top tier). The floor that can never be deleted is the three read-only reviewers —
+`editing-reviewer`, `consistency-reviewer`, `accuracy-reviewer`; the
+`currency-researcher` worker runs a tier below them, reads/drafts, and returns text
+(only you commit). **Before every content PR, dispatch the three reviewers and record
+each verdict to `.claude/review/<agent>.md`** (refreshed that PR), and dispatch
+`currency-researcher` for anything asserting platform behavior. Manage an agent on
+intent (resolve → restate → confirm before delete); keep every new agent
+least-privilege, model-agnostic, and memoried.
+
+**Memory cycle.** Read at start → record each decision, root cause, or gotcha to the
+**narrowest** tier (repo `MEMORY.md` = whole-scene facts · `docs/CLAUDE.md` = folder
+wiring · agent `.memory.md` = that agent's lessons) → correct a memory when the thing
+it described changes → prune (keep each short).
+
+**The gate — confirm before opening the PR:**
+- [ ] Goal restated; only what the task needs was touched.
+- [ ] Every platform claim verified against current official docs and stamped; none
+      left older than ~6 months unchecked.
+- [ ] Shared content moved across ALL framework copies; each changed pipe's dependents
+      moved with it; anchors / steps / headings still parallel.
+- [ ] The three reviewers ran; `.claude/review/` verdicts refreshed this PR.
+- [ ] Memory updated at the narrowest tier and pruned.
+- [ ] One PR, with a plain-English "what changed / how to undo" for the human.

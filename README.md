@@ -26,8 +26,12 @@ public env-var prefix, the deploy specifics) differ.
 
 - **[Vite + React](docs/vite/01-the-model.md)** — apps behind a login (no SEO
   need). The default; choose it if you're unsure.
-- **Next.js**, **Astro**, **SvelteKit** — guides being added under `docs/` for
-  SEO-driven and full-stack-framework apps.
+- **[Next.js](docs/next/01-the-model.md)** — SSR/SSG for SEO-driven public sites
+  (App Router + `@supabase/ssr`).
+- **[Astro](docs/astro/01-the-model.md)** — content/SSR sites with islands
+  (`@astrojs/vercel` + `@supabase/ssr`).
+- **[SvelteKit](docs/sveltekit/01-the-model.md)** — full-stack Svelte apps
+  (`@sveltejs/adapter-vercel` + `@supabase/ssr`).
 
 ## How to use this repo
 
