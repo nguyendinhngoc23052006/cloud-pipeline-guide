@@ -28,7 +28,9 @@ public env-var prefix, the deploy specifics) differ.
   need). The default; choose it if you're unsure.
 - **[Next.js](docs/next/01-the-model.md)** — SSR/SSG for SEO-driven public sites
   (App Router + `@supabase/ssr`).
-- **Astro**, **SvelteKit** — guides being added under `docs/`.
+- **[Astro](docs/astro/01-the-model.md)** — content/SSR sites with islands
+  (`@astrojs/vercel` + `@supabase/ssr`).
+- **SvelteKit** — guide being added under `docs/`.
 
 ## How to use this repo
 
