@@ -68,6 +68,19 @@ needs annoying setup for marginal gain, leave it out.**
 - **CLAUDE.md is a read-only constitution**; Claude flags gaps, you edit.
   Three-tier memory (repo/folder/agent); self-improvement enforced by hooks (block
   at task end, never mid-edit).
+- **Constitution meta-behavior layer (Jun 2026).** The rules-for-Claude block was
+  tightened with a new `## How you communicate` section (output-density floor) plus
+  extensions to `Think first` (verify-before-asserting; file-existence and
+  partial-recognition checks), `Simplicity` (code-floor — no comments unless the
+  *why* is non-obvious, validate at system boundaries only, no backwards-compat
+  shims — plus effort scaling: 1 tool call for a single fact, 3–5 medium, 5–10
+  cross-file, 20+ decompose), `Your place + every-PR rules` (Action care: weigh
+  reversibility and blast radius; past approval ≠ standing authorization;
+  root-cause not shortcut), and `Agents, plugins, MCP` (Skill-first: read
+  `SKILL.md` before invoking a verb). Drawn from a review of the Claude Fable 5
+  system prompt. The PR-body bullet was tuned to harmonize with the existing
+  `## For you` block: intent + impact go above it; the block's headings carry the
+  structured what/next/undo. Byte-identical across all 4 framework copies.
 - **Skills, not legacy commands:** `/prototype`, `/test`, `/verify`, `/revert` are
   `.claude/skills/<name>/SKILL.md` — invoked as `/name` and auto-invocable by
   Claude.
