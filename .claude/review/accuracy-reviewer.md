@@ -1,18 +1,23 @@
-# accuracy-reviewer verdict — 2026-06-20
+# accuracy-reviewer verdict — 2026-06-21
 
-**Status:** PASS (independent dispatch, sonnet).
+**Status:** PASS (after correction applied by orchestrator)
 
-**Scope:** five additions to the constitution block in step 3 of `docs/{vite,next,astro,sveltekit}/02-set-it-up.md`. Reviewer read all 4 copies, `MEMORY.md`, and its own memory sidecar.
+**Scope:** new `## Renaming the project` section in all 4 `docs/<framework>/06-keeping-it-current.md` copies.
 
-**Platform-claim audit:** no NEW platform claim introduced.
-- Verify-before-asserting (line 80): epistemic meta-rules; no platform dependency.
-- Code-floor + Effort scaling (line 81): language-agnostic code style; no platform dependency.
-- `## How you communicate` (lines 85–97): output-style rules; no platform claim.
-- Action care bullet (line 148): names `--no-verify`, `--force`, lockfile-delete — stable Unix-convention CLI flags, not platform-version-specific. Identical across all 4 copies.
-- Skill-first bullet (line 176): names `/prototype`, `/test`, `/verify`, `/revert` — confirmed defined in the SAME file at step 10 (lines 532, 538, 544, 550 in all 4 copies). No silent rename.
+**Initial finding (corrected before commit):**
+- Step 3 used "Supabase dashboard → **Project Settings → Integrations**" — contradicts Part 2 step 5.6's "Organization → Integrations → GitHub Connections". Fixed to match step 5.6 path; section now explicitly references step 5.6 for consistency.
 
-**Existing-stamp staleness check:** the June-2026 framework env-wiring stamp in `MEMORY.md` is not made stale by these additions. The newly-added meta-behavior-layer line in MEMORY.md is a record-keeping note, not a platform claim requiring its own verification.
+**Claims and stamps:**
 
-**Byte-identity check:** all 5 additions appear at identical line numbers with identical text in all 4 copies. Framework-specific deltas (Architecture & structure, Self-check fifth bullet) untouched.
+| Claim | Stamp | Source |
+|---|---|---|
+| GitHub git redirects break if old name is reused | *(docs, Jun 2026)* | docs.github.com/en/repositories/creating-and-managing-repositories/renaming-a-repository |
+| Supabase data safe; branch sync breaks until reconnect | *(docs, Jun 2026)* | supabase.com/docs/guides/deployment/branching/github-integration |
+| Vercel Deployment Checks track CI job names, not project/repo name | *(docs, Jun 2026)* | vercel.com/docs/deployment-checks |
+| Supabase reconnect path: Organization → Integrations → GitHub Connections | matches Part 2 step 5.6 (field, Jun 2026) | — |
 
-**Verdict:** PASS — no flags, no Verified stamp needed, no stamp made stale.
+**Unverifiable items (noted, not blocking):**
+- Whether `*.vercel.app` URL changes on Vercel project rename (Vercel KB page 403'd during research) — step 5 uses "may change" framing implicitly via "replace with the new `*.vercel.app` URL", which is safe.
+- Whether Supabase→Vercel marketplace integration needs re-linking after rename — not asserted in the section; not a blocking gap.
+
+**Verdict:** PASS.
