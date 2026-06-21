@@ -59,3 +59,10 @@ start of every task, and record decisions, root causes, and gotchas as you go.
   `02-set-it-up.md:140` (Memory "Cycle"), `:141` (Memory "Worked/failed"), `:144`
   (Your place "Flow"). Flagged by editing-reviewer Jun 2026 as CONCERN, out of
   scope of the meta-behavior-layer PR; rewrite as full sentences with verbs.
+- **"Renaming the project" section added Jun 2026** to all 4 `docs/<framework>/06-keeping-it-current.md`
+  copies (byte-identical, framework-neutral). Verified: GitHub redirects break if old
+  name reused (docs); Supabase branch sync breaks until reconnected via Organization →
+  Integrations → GitHub Connections (same path as step 5.6); Vercel Deployment Checks
+  unaffected by rename (track CI job names). `*.vercel.app` URL change on Vercel rename
+  and Supabase→Vercel integration re-link behavior: not doc-verified (KB 403'd) — step
+  5 is marked optional and uses safe "replace with the new URL" framing.

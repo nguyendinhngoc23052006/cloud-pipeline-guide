@@ -125,6 +125,40 @@ Change the env-name contract: <what you're changing>. Move ALL of it in ONE PR: 
 
 ---
 
+## Renaming the project
+
+Six ordered steps — reconnect the platforms before Claude's file PR, because the
+PR prompt names the new repo.
+
+1. github.com → your repo → **Settings** → **Repository name** — type the new
+   name → **Rename**.
+2. github.com → **Settings → Applications → Claude → Repository access** — add
+   the renamed repo → **Save**.
+3. Supabase → **Organization → Integrations → GitHub Connections** — remove the
+   old repo connection and reconnect to the renamed repo (same path as Part 2
+   step 5.6; existing connections silently keep pointing at the old name with no
+   error shown anywhere).
+4. Vercel → **project → Settings → Git** — disconnect and reconnect to the
+   renamed repo.
+5. *(Optional — rename the Vercel project to match):* Vercel → **project →
+   Settings → General → Project Name** — type the new name → **Save**; then
+   update the uptime monitor: GitHub → **Settings → Secrets and variables →
+   Actions → Variables → `PRODUCTION_URL`** — replace with the new
+   `*.vercel.app` URL.
+6. Paste this to Claude:
+
+```text
+The project has been renamed to <new-name>. In one PR update every reference to the old name: supabase/config.toml project_id label, package.json name, the app title in index.html and any component that renders it, MEMORY.md, docs/ARCHITECTURE.md, and README.md. Open a PR into main.
+```
+
+*Note:* GitHub git redirects break permanently if anyone later creates a new repo
+with the old name — update remotes promptly. Your Supabase data is safe; only the
+branch sync breaks until step 3 reconnects it. Vercel Deployment Checks don't
+need reselecting — they track CI job names, not the project or repo name. *(docs,
+Jun 2026)*
+
+---
+
 ## Refresh a part to current docs
 
 Use this when a part is structurally fine but may have drifted from the
