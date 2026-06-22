@@ -214,7 +214,7 @@ Scaffold a MINIMAL SvelteKit + TypeScript app (with @sveltejs/adapter-vercel) th
 - Mocked unit tests for the server resolver proving it builds from the PUBLIC_ names, from the NEXT_PUBLIC_ names alone (the preview case), and shows the readable error when both are absent.
 - Run `npx supabase init` for config.toml (do NOT hand-write it). Leave the top-level project_id at its default (the folder name — NOT the remote ref). Set [db.seed] enabled=true, sql_paths=["./seed.sql"].
 - supabase/migrations/<UTC>_init.sql that only enables pgcrypto; supabase/seed.sql empty except a comment. (Auth users, storage buckets, and tables come later, when you build those features.)
-- ESLint + strict TypeScript + Prettier + Vitest with one passing test. package.json scripts named exactly `lint`, `typecheck`, and `test` (the step 8 `tests` CI job runs `npm test`).
+- Biome (single binary replacing ESLint and Prettier; `biome.json` at the root; `lint` script is `biome check .`) + strict TypeScript + Vitest with one passing test. package.json scripts named exactly `lint`, `typecheck`, and `test` (the step 8 `tests` CI job runs `npm test`).
 - A committed package-lock.json; .github/dependabot.yml (weekly npm + github-actions, grouped); .env.example with the PUBLIC_SUPABASE_* vars; .gitignore ignoring .env*.
 - A short CLAUDE.md in src/ (one line: components render, services validate — see the root CLAUDE.md folders rule) and in supabase/ (one line: migrations are append-only and UTC-named — see the root migrations rule). Nothing more — they grow via the memory cycle.
 Open a PR into main.
@@ -395,7 +395,7 @@ Add a permanent GET /health route that does one cheap Supabase round-trip needin
    `cdn.playwright.dev` — step 2.3):
 
 ```text
-Create a mocked-network Playwright E2E suite plus its CI gate. Add @playwright/test as a devDependency and an "e2e" script ("playwright test"). playwright.config.ts: chromium only; a webServer that builds the app with stub Supabase env set inline (a stub PUBLIC_SUPABASE_URL and publishable key, so the bundle has config but reaches nothing real) and serves the preview on a fixed port used as baseURL; retries 2 in CI / 0 locally; trace on-first-retry. e2e/_mocks.ts intercepts every request to the stub host with deterministic defaults (no session, empty lists) so the suite is offline. e2e/smoke.spec.ts covers a few network-light flows with role/label selectors — the landing page renders, a client-side validation error shows with no network, and a logged-out visit to a gated route redirects to login. .github/workflows/e2e.yml: a job named exactly "e2e" running npm ci, `npx playwright install --with-deps chromium`, then the suite, uploading the trace artifact on failure. Add playwright-report/ and test-results/ to .gitignore and the ESLint ignores. Run it green in the sandbox before opening the PR. Open a PR into main.
+Create a mocked-network Playwright E2E suite plus its CI gate. Add @playwright/test as a devDependency and an "e2e" script ("playwright test"). playwright.config.ts: chromium only; a webServer that builds the app with stub Supabase env set inline (a stub PUBLIC_SUPABASE_URL and publishable key, so the bundle has config but reaches nothing real) and serves the preview on a fixed port used as baseURL; retries 2 in CI / 0 locally; trace on-first-retry. e2e/_mocks.ts intercepts every request to the stub host with deterministic defaults (no session, empty lists) so the suite is offline. e2e/smoke.spec.ts covers a few network-light flows with role/label selectors — the landing page renders, a client-side validation error shows with no network, and a logged-out visit to a gated route redirects to login. .github/workflows/e2e.yml: a job named exactly "e2e" running npm ci, `npx playwright install --with-deps chromium`, then the suite, uploading the trace artifact on failure. Add playwright-report/ and test-results/ to .gitignore and exclude them from Biome's analysis in biome.json. Run it green in the sandbox before opening the PR. Open a PR into main.
 ```
 
 7. Review and merge each PR.
@@ -471,6 +471,19 @@ job, no setup-deno, no sandbox exception — it rides the existing `tests` gate.
 (Real `deno test` in the sandbox is now reachable by allowlisting `deno.land` in
 step 2.3, but it only adds coverage of the thin handler glue the vitest-aliased
 helpers already exercise — not worth the extra toolchain.)
+
+**↑ Upgrade — faster CI with Depot runners:** Depot replaces GitHub's default runners with no workflow rewrite — the entire integration is one `runs-on` label change per job. Up to 3× faster build execution and 10× faster cache operations (~1 GB/s vs GitHub's ~145 MB/s), with sub-5-second runner startup.
+
+1. [depot.dev](https://depot.dev) → **Sign up**; install the Depot GitHub App for your repository.
+2. Paste:
+
+```text
+Update .github/workflows/ci.yml and .github/workflows/e2e.yml: change every `runs-on: ubuntu-latest` to `runs-on: depot-ubuntu-latest`. No other changes. Open a PR into main.
+```
+
+3. Review and merge the PR.
+
+*Note:* the only change is the `runs-on` label — no steps, secrets, or workflow logic change. To roll back, revert both files to `ubuntu-latest`. Check [depot.dev/pricing](https://depot.dev/pricing) before enabling on a private repository. Verified Jun 2026 (depot.dev/docs/github-actions/overview).
 
 ## 9. Protect `main`
 1. **GitHub → Settings → Rules → Rulesets → New branch ruleset.** (A templated
