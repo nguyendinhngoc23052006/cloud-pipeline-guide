@@ -1,19 +1,22 @@
-# consistency-reviewer verdict — 2026-06-21
+# consistency-reviewer verdict — 2026-06-22
 
 **Status:** PASS
 
-**Scope:** new `## Renaming the project` section in all 4 `docs/<framework>/06-keeping-it-current.md` copies (vite, next, astro, sveltekit).
+**Scope:** Biome + Depot changes across all 4 framework copies (02-set-it-up.md
+and 07-decision-log.md).
 
-**Byte-identity across copies:** PASS — section is framework-neutral; confirmed identical across all four files.
+**Byte-identity across copies:** PASS — all three shared changes (scaffold Biome
+line, E2E Biome ignore line, Depot upgrade block) are byte-identical across
+vite/next/astro/sveltekit. The two decision log bullet points (Biome, Depot) are
+likewise byte-identical, inserted before each copy's framework-specific delta.
 
-**Structural parallelism:** PASS — uses `##` top-level heading matching other operational sections (`## Refresh a part to current docs`, `## Workarounds`); numbered steps + one *note* format consistent with Part 2 conventions.
+**Structural parallelism:** PASS — step numbers, section headings, filenames
+unchanged; no cross-reference drift.
 
 **Connected-line principle:**
-- Step 2 references Claude GitHub App access (established Part 2 step 2.1) — earlier ✓
-- Step 3 references Supabase GitHub Connection (established Part 2 step 5.6) — earlier ✓; path matches step 5.6 explicitly
-- Step 4 references Vercel Git connection (established Part 2 step 6) — earlier ✓
-- Step 5 references `PRODUCTION_URL` (established Part 2 step 8.5) — earlier ✓
-
-**Pipe-moved-alone check:** section is additive only; no existing pipe was touched.
+- Depot upgrade references ci.yml (step 8.1) and e2e.yml (step 8.6) — earlier.
+- `lint` script name contract unchanged — PASS.
+- No pipe moved alone: scaffold prompt, E2E prompt, and decision log all updated
+  together across all copies.
 
 **Verdict:** PASS.

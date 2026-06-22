@@ -66,3 +66,12 @@ start of every task, and record decisions, root causes, and gotchas as you go.
   unaffected by rename (track CI job names). `*.vercel.app` URL change on Vercel rename
   and Supabase→Vercel integration re-link behavior: not doc-verified (KB 403'd) — step
   5 is marked optional and uses safe "replace with the new URL" framing.
+- **Biome replaces ESLint + Prettier Jun 2026** in scaffold prompt (step 4) and E2E
+  prompt (step 8.6) across all 4 framework copies. `lint` script name unchanged (CI
+  contract). Decision log entries added. Accuracy reviewer flagged: don't assert specific
+  biome.json config keys in prompts — let Claude resolve them at scaffold time.
+- **Depot CI accelerator added Jun 2026** as an ↑ Upgrade in step 8 across all 4 copies.
+  Integration is `runs-on: depot-ubuntu-latest` (label change only). Verified speed:
+  3x builds, 10x cache, sub-5s startup (depot.dev/docs/github-actions/overview).
+  Editing reviewer flagged: arrows in numbered steps must connect only literal on-screen
+  labels — prose after the last label uses semicolon, not arrow.

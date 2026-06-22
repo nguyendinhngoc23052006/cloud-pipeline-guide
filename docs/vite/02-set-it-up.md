@@ -474,7 +474,7 @@ helpers already exercise — not worth the extra toolchain.)
 
 **↑ Upgrade — faster CI with Depot runners:** Depot replaces GitHub's default runners with no workflow rewrite — the entire integration is one `runs-on` label change per job. Up to 3× faster build execution and 10× faster cache operations (~1 GB/s vs GitHub's ~145 MB/s), with sub-5-second runner startup.
 
-1. [depot.dev](https://depot.dev) → **Sign up** → install the Depot GitHub App for your repository.
+1. [depot.dev](https://depot.dev) → **Sign up**; install the Depot GitHub App for your repository.
 2. Paste:
 
 ```text
