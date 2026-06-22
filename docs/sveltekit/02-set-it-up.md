@@ -55,6 +55,9 @@ guards the account that controls everything else. Free branch protection needs a
 4. **Leave the setup script empty** — the image already has Node/npm and `npx`
    fetches the Supabase CLI; a failing `npm install` here breaks startup.
 5. No secrets in the env box; commit the `.claude/` folder.
+6. In Claude Code **Settings**, enable **Automatically create PR** (Claude opens
+   the PR itself when a task ends, without a second prompt) and **Auto-fix PR**
+   (Claude watches its open PRs and pushes a fix when CI fails).
 
 *Note:* Claude works in a disposable sandbox — it branches off `main` and opens
 PRs but can't merge.
@@ -363,9 +366,15 @@ Create .github/workflows/ci.yml: on every pull_request AND on push to main, thre
 ```
 
 2. In GitHub **Settings → General**, make sure **"Automatically delete head
-   branches" is OFF**; then in **Settings → Advanced Security**, turn
-   **Dependabot security updates ON** (CVE patches arrive as PRs through the
-   normal gate, not just weekly version bumps).
+   branches" is OFF** and enable **"Allow auto-merge"**; then in **Settings →
+   Advanced Security**, turn **Dependabot security updates ON** (CVE patches
+   arrive as PRs through the normal gate, not just weekly version bumps). Paste
+   this so Dependabot patch updates merge automatically once CI is green:
+
+```text
+Create .github/workflows/dependabot-auto-merge.yml: triggered on pull_request_target (so GITHUB_TOKEN has write access for Dependabot PRs), permissions contents: write and pull-requests: write. One job that runs only when github.actor == 'dependabot[bot]': step 1 — dependabot/fetch-metadata@v2 with id "meta" and github-token from GITHUB_TOKEN; step 2 — if meta.outputs.update-type is 'version-update:semver-patch', run `gh pr merge --auto --squash "$PR_URL"` with env GH_TOKEN from GITHUB_TOKEN and PR_URL from github.event.pull_request.html_url. Open a PR into main.
+```
+
 3. Paste this for branch cleanup:
 
 ```text
@@ -502,12 +511,17 @@ Update .github/workflows/ci.yml and .github/workflows/e2e.yml: change every `run
    missing, open a throwaway PR so it reports, then refresh.
 5. **Require conversation resolution** + **linear history**.
 6. **Block force pushes** + **Restrict deletions**.
-7. **Bypass list empty** → **Create**.
+7. **Bypass list** → **Add bypass** → **Integration** → search and select
+   **Dependabot** → **Pull requests only**; then **Create**. (This lets the
+   auto-merge workflow from step 8.2 skip the approval gate for Dependabot patch
+   PRs — CI still runs and must pass.)
 
 *Note:* this is the human gate — Claude opens PRs but can't approve its own. It's
 last because it needs the checks the earlier steps created: `tests`/`lint`/
 `typecheck`/`e2e` come from step 8's workflows, **Supabase Preview** from step 5's
-branching, **Vercel** from step 6's import.
+branching, **Vercel** from step 6's import. The Dependabot bypass waives only the
+approval requirement for patch updates — CI still runs on every Dependabot PR and
+must pass before auto-merge fires.
 
 **✓** a PR with a failing check won't merge; trying to merge without an approval
 is blocked. *Two gotchas that quietly un-gate it:* on a **private** repo the
@@ -613,7 +627,7 @@ Capture the first half once:
    project-specific may ever merge here." Then close with the audit prompt:
 
 ```text
-Audit this repo against the baseline manifest and report — fix nothing: root CLAUDE.md + folder CLAUDE.mds; EMPTY MEMORY.md; three reviewer agents plus the `researcher` worker, each with memory sidecars and no model named in their files; the Stop/SessionStart hooks; ci.yml (tests/lint/typecheck), branch-cleanup.yml, uptime.yml, e2e.yml (job `e2e`); playwright.config.ts + the e2e/ suite + the `e2e` script; dependabot.yml; the four skills; the scaffold with the server-side PUBLIC_ ?? NEXT_PUBLIC_ resolver (hooks.server.ts) passed to the client via the layout load, /health, and typed resolver tests (no vercel.json); .github/main-ruleset.json; only the pgcrypto init migration. Flag anything missing, anything extra, and anything project-specific.
+Audit this repo against the baseline manifest and report — fix nothing: root CLAUDE.md + folder CLAUDE.mds; EMPTY MEMORY.md; three reviewer agents plus the `researcher` worker, each with memory sidecars and no model named in their files; the Stop/SessionStart hooks; ci.yml (tests/lint/typecheck), branch-cleanup.yml, uptime.yml, e2e.yml (job `e2e`); playwright.config.ts + the e2e/ suite + the `e2e` script; dependabot.yml, dependabot-auto-merge.yml; the four skills; the scaffold with the server-side PUBLIC_ ?? NEXT_PUBLIC_ resolver (hooks.server.ts) passed to the client via the layout load, /health, and typed resolver tests (no vercel.json); .github/main-ruleset.json; only the pgcrypto init migration. Flag anything missing, anything extra, and anything project-specific.
 ```
 2. In the template repo: **Settings → General → Template repository → ON**.
 3. Export your working project's ruleset once — **Settings → Rules → Rulesets →
@@ -624,8 +638,8 @@ Audit this repo against the baseline manifest and report — fix nothing: root C
    Create a new repository** → grant the Claude GitHub App access to it
    (github.com → **Settings → Applications → Claude → Repository access** → add
    the new repo — step 2.1 granted only-selected repos, so each new one must be
-   added) → redo step 8.2's two clicks (auto-delete OFF, Dependabot security
-   updates ON — templates copy files, never settings) → set the new cloud env's
+   added) → redo step 8.2's three clicks (auto-delete OFF, Allow auto-merge ON, Dependabot
+   security updates ON — templates copy files, never settings) → set the new cloud env's
    network per step 2.3 (Custom + the default-package-managers box +
    `cdn.playwright.dev`) → do step 5 (new Supabase project) and step 6 (new Vercel
    project) for it → **Settings → Rules → Rulesets → Import a ruleset** → select
