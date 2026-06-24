@@ -218,7 +218,7 @@ Scaffold a MINIMAL Astro + TypeScript app (SSR: output 'server' with the @astroj
 - Run `npx supabase init` for config.toml (do NOT hand-write it). Leave the top-level project_id at its default (the folder name — NOT the remote ref). Set [db.seed] enabled=true, sql_paths=["./seed.sql"].
 - supabase/migrations/<UTC>_init.sql that only enables pgcrypto; supabase/seed.sql empty except a comment. (Auth users, storage buckets, and tables come later, when you build those features.)
 - Biome (single binary replacing ESLint and Prettier; `biome.json` at the root; `lint` script is `biome check .`) + strict TypeScript + Vitest with one passing test. package.json scripts named exactly `lint`, `typecheck`, and `test` (the step 8 `tests` CI job runs `npm test`).
-- A committed package-lock.json; .github/dependabot.yml (weekly npm + github-actions, grouped); .env.example with the PUBLIC_SUPABASE_* vars; .gitignore ignoring .env*.
+- A committed package-lock.json; .github/dependabot.yml (weekly npm + github-actions, grouped; omit the runs-on field — Dependabot uses GitHub-hosted runners by default); .env.example with the PUBLIC_SUPABASE_* vars; .gitignore ignoring .env*.
 - A short CLAUDE.md in src/ (one line: components render, services validate — see the root CLAUDE.md folders rule) and in supabase/ (one line: migrations are append-only and UTC-named — see the root migrations rule). Nothing more — they grow via the memory cycle.
 Open a PR into main.
 ```
