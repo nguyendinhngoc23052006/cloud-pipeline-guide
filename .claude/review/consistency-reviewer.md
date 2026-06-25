@@ -32,4 +32,8 @@ new step 6.7 in Vite/Astro/SvelteKit; workaround rows removed; MEMORY.md updated
 
 **Amendment (same PR):** Step 8.2 "Dependabot on self-hosted runners" warning — byte-identical text added to all 4 copies at the same paragraph position — PASS.
 
+**Amendment 2 (same PR — stress-test finds):**
+- Vite step 12 audit prompt only: "two-prefix fallback chain" → "single-prefix VITE_ supabaseClient" — framework-specific change (each copy describes its own scaffold); other 3 copies unchanged (they already described their framework-native prefix correctly).
+- Step 12.4 "three clicks" → "settings" with self-hosted runners: byte-identical across all 4 copies — PASS.
+
 **Verdict:** PASS.

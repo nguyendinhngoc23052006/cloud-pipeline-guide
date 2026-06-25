@@ -27,4 +27,8 @@ consistent with the documented behavior and the other three copies.
 
 **Amendment (same PR):** Step 8.2 "Dependabot on self-hosted runners" warning — claim: "if it is ON with no self-hosted runners, Dependabot jobs queue indefinitely and never run" — confirmed by the user's own observation (their edu repo had this ON and Dependabot was silently broken); matches GitHub's documented behavior that Dependabot jobs routed to self-hosted runners require a self-hosted runner to be available — PASS.
 
+**Amendment 2 (same PR — stress-test finds):**
+- Vite step 12 audit prompt: "single-prefix VITE_ supabaseClient (VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY)" — accurately describes what the step 4 scaffold creates after prefix retirement; no unverifiable platform claim — PASS.
+- Step 12.4: enumerating "self-hosted runners OFF" in the parenthetical — consistent with the step 8.2 setting now documented — PASS.
+
 **Verdict:** PASS.

@@ -627,7 +627,7 @@ Capture the first half once:
    project-specific may ever merge here." Then close with the audit prompt:
 
 ```text
-Audit this repo against the baseline manifest and report — fix nothing: root CLAUDE.md + folder CLAUDE.mds; EMPTY MEMORY.md; three reviewer agents plus the `researcher` worker, each with memory sidecars and no model named in their files; the Stop/SessionStart hooks; ci.yml (tests/lint/typecheck), branch-cleanup.yml, uptime.yml, e2e.yml (job `e2e`); playwright.config.ts + the e2e/ suite + the `e2e` script; dependabot.yml, dependabot-auto-merge.yml; the four skills; the scaffold with the two-prefix fallback chain, /health, vercel.json, and typed supabaseClient tests; .github/main-ruleset.json; only the pgcrypto init migration. Flag anything missing, anything extra, and anything project-specific.
+Audit this repo against the baseline manifest and report — fix nothing: root CLAUDE.md + folder CLAUDE.mds; EMPTY MEMORY.md; three reviewer agents plus the `researcher` worker, each with memory sidecars and no model named in their files; the Stop/SessionStart hooks; ci.yml (tests/lint/typecheck), branch-cleanup.yml, uptime.yml, e2e.yml (job `e2e`); playwright.config.ts + the e2e/ suite + the `e2e` script; dependabot.yml, dependabot-auto-merge.yml; the four skills; the scaffold with the single-prefix VITE_ supabaseClient (VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY), /health, vercel.json, and typed supabaseClient tests; .github/main-ruleset.json; only the pgcrypto init migration. Flag anything missing, anything extra, and anything project-specific.
 ```
 2. In the template repo: **Settings → General → Template repository → ON**.
 3. Export your working project's ruleset once — **Settings → Rules → Rulesets →
@@ -638,8 +638,8 @@ Audit this repo against the baseline manifest and report — fix nothing: root C
    Create a new repository** → grant the Claude GitHub App access to it
    (github.com → **Settings → Applications → Claude → Repository access** → add
    the new repo — step 2.1 granted only-selected repos, so each new one must be
-   added) → redo step 8.2's three clicks (auto-delete OFF, Allow auto-merge ON, Dependabot
-   security updates ON — templates copy files, never settings) → set the new cloud env's
+   added) → redo step 8.2's settings (auto-delete OFF, Allow auto-merge ON, Dependabot
+   security updates ON, self-hosted runners OFF — templates copy files, never settings) → set the new cloud env's
    network per step 2.3 (Custom + the default-package-managers box +
    `cdn.playwright.dev`) → do step 5 (new Supabase project) and step 6 (new Vercel
    project) for it → **Settings → Rules → Rulesets → Import a ruleset** → select

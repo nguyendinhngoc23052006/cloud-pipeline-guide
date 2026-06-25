@@ -30,6 +30,11 @@ so the "close and reopen the PR" workaround is also retired.
   turning Dependabot security updates ON, users must also confirm "Dependabot on
   self-hosted runners" is OFF — if it is ON with no self-hosted runners configured,
   all Dependabot jobs queue indefinitely and silently never run.
+- **Step 12 audit prompt (Vite only)**: "two-prefix fallback chain" replaced with
+  "single-prefix VITE_ supabaseClient" — the cross-prefix bridge was retired in this
+  PR and the audit prompt was still describing the old scaffold.
+- **Step 12.4 (all 4 copies)**: "three clicks" updated to "settings" with self-hosted
+  runners OFF added to the parenthetical — now consistent with the expanded step 8.2.
 - **`.claude/review/`**: three reviewer verdicts refreshed for this PR.
 
 ## Self-check

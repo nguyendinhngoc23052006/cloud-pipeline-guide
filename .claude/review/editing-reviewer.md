@@ -30,4 +30,8 @@ reads "push any commit to the PR branch to retrigger env sync."
 
 **Amendment (same PR):** Step 8.2 "Dependabot on self-hosted runners" warning added to all 4 copies — inline continuation of the same numbered-step sentence (not a separate bullet), no arrow rule or order violation, no CLI requirement, byte-identical across all 4 copies — PASS.
 
+**Amendment 2 (same PR — stress-test finds):**
+- Vite step 12 audit prompt: "two-prefix fallback chain" → "single-prefix VITE_ supabaseClient" — removes a now-stale description; no editing-rule violation.
+- Step 12.4 all 4 copies: "three clicks" → "settings" with the self-hosted runners item added — consistent with expanded step 8.2; byte-identical across all 4 copies — PASS.
+
 **Verdict:** PASS.
