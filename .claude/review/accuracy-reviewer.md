@@ -1,21 +1,37 @@
-# accuracy-reviewer verdict — 2026-06-26
+# accuracy-reviewer verdict — PR: connectors/vercel-deploy/supabase-toggles (Jun 2026)
 
-**PR:** Phase-first step ordering in Part 2 (12 → 14 steps)
+**Result: PASS** (after corrections applied this PR)
 
-**Status:** PASS
+All five platform claims audited; three required factual corrections (applied this PR):
 
-**Scope:** docs/vite/02-set-it-up.md (spot-check), docs/vite/07-decision-log.md (new bullet), MEMORY.md (new entry).
+**Claim 1 — Claude Code GitHub App scope + "repository selector" UI label**
+VERIFIED Jun 2026. Sources: code.claude.com/docs/en/claude-code-on-the-web and
+code.claude.com/docs/en/web-quickstart. Confirmed verbatim: "a cloud session can
+access any repository the connecting GitHub account can see, not just the repositories
+the Claude GitHub App is installed on" and "click the repository selector below the
+input box." Stamp added to step 2.1 in all 4 copies.
 
-**Claims checked:**
+**Claim 2 — Vercel "Promote to Production" does not rebuild** — CORRECTED
+"promotes the already-built code without a rebuild" was factually wrong. Verified
+(vercel.com/docs/deployments/promoting-a-deployment): promoting a preview deployment
+triggers a full rebuild using production environment variables. No-rebuild path is
+Instant Rollback (reverts production; does not promote previews). Step 7 ✗ corrected
+across all 4 copies. MEMORY.md updated.
 
-1. Platform claims in 02-set-it-up.md — all inherit verification from the decision log's Jun 2026 entries, which are current (within 6-month window from 2026-06-26). No new unverified platform claims introduced by the step reordering.
+**Claim 3 — Supabase Branching toggle independence**
+PARTIALLY VERIFIED Jun 2026 — supabase.com discussion #32596 (official docs page 403'd).
+Confirms: branch-specific credentials injected at PR-open without the Preview toggle;
+Preview ON overwrites preview env vars with production credentials. Stamp added noting
+partial verification source.
 
-2. New decision log bullet "Phase-first step ordering in Part 2 (Jun 2026)" — makes no platform claims; records only internal ordering logic and step-number shifts. No Verified stamp needed.
+**Claim 4 — Integration injects ANON_KEY for previews** — CORRECTED
+OUTDATED. New Supabase projects (Nov 2025+) receive PUBLISHABLE_KEY, not ANON_KEY.
+Sources: supabase.com discussions #29260, #40717. The `?? ANON_KEY` fallback in client
+code is still correct (covers legacy projects). Step 8 Note and step 8 ✓ updated across
+all 4 copies to "either PUBLISHABLE_KEY (new) or ANON_KEY (legacy)." MEMORY.md corrected.
 
-3. New MEMORY.md entry "Phase-first step ordering in Part 2 (Jun 2026)" — same; no platform claims.
-
-**Pre-existing flags (not introduced by this PR):**
-- docs/vite/02-set-it-up.md:281 — "the default for new projects" for Vercel Branch Tracking pointing at `main` lacks an explicit stamp. Pre-existing; not changed by this PR.
-- docs/vite/02-set-it-up.md:283 — "Vercel enables it by default on new projects" for Vercel Authentication. Pre-existing; not changed by this PR.
-
-**Verdict:** PASS. No new unverified platform claims introduced.
+**Claim 5 — Vercel webhooks "occasionally fail" on merge**
+OBSERVED PATTERN, not Vercel-documented behavior. Supported by community forum
+(community.vercel.com) and Vercel's incident history (2025-2026). Wording changed
+to "webhook delivery failures on merge have been reported in Vercel's community
+forums and incident history" across all 4 copies.
