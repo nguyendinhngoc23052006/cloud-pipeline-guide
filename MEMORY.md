@@ -50,11 +50,36 @@ start of every task, and record decisions, root causes, and gotchas as you go.
   (verify-before-asserting), `Simplicity` (code-floor + effort scaling),
   `Your place + every-PR rules` (Action care), `Agents, plugins, MCP` (Skill-first).
   Byte-identical across all 4 framework copies of `docs/<framework>/02-set-it-up.md`.
-- **Verified Jun 2026 — integration injects both key names:** the External Connection
-  auto-injects both `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  *(field, Jun 2026; user Vercel dashboard — official marketplace docs list only ANON_KEY,
-  so actual injection exceeds the documented list)*. The `…PUBLISHABLE_KEY ?? …ANON_KEY`
-  fallback chain covers both; issue #38984 remains open but resolved in practice.
+- **Verified Jun 2026 — integration injects PUBLISHABLE_KEY (new) or ANON_KEY (legacy):**
+  New Supabase projects (Nov 2025+) receive `<PREFIX>SUPABASE_PUBLISHABLE_KEY` from the
+  integration; legacy projects receive `<PREFIX>SUPABASE_ANON_KEY`. Both receive
+  `<PREFIX>SUPABASE_URL`. The `?? …ANON_KEY` fallback in client code correctly handles both:
+  new projects use PUBLISHABLE_KEY directly; legacy projects fall through to ANON_KEY.
+  Source: supabase.com discussions #29260, #40717. Guide notes and MEMORY.md corrected Jun 2026.
+- **Verified Jun 2026 — Promote to Production triggers a full rebuild:** Promoting a preview
+  deployment to production via **⋯ → Promote to Production** triggers a new build using
+  production environment variables — it does NOT reuse the preview artifact without a rebuild.
+  (Instant Rollback is the no-rebuild path, but is for reverting production, not promoting
+  previews.) Source: vercel.com/docs/deployments/promoting-a-deployment. Guide step 7 ✗
+  corrected across all 4 copies Jun 2026.
+- **Verified Jun 2026 — Preview/Development toggles OFF is correct and intended:** In the
+  Supabase→Vercel integration settings, Production ON + Preview OFF + Development OFF is the
+  right state. When Preview is ON, it overwrites each PR's branch-specific credentials with
+  the main project's production credentials (Supabase discussion #26870), breaking previews.
+  Supabase Branching injects per-PR credentials via GitHub webhook independently — the Preview
+  toggle is NOT needed for that mechanism.
+- **Verified Jun 2026 — Claude Code session access and GitHub connector:** Session repository
+  access follows the connected GitHub account permissions, NOT the GitHub App's install scope.
+  The App scope (All repositories vs Only selected) controls only Auto-fix monitoring — it does
+  not restrict which repos appear in the session's repository selector. Each cloud session has
+  a repository selector dropdown below the input box to pick the repo for that session. Guide
+  step 2.1 corrected across all 4 copies to reflect connector flow + repo picker.
+- **Root cause Jun 2026 — PR 71 missed Vercel production deploy:** Merge to main did not
+  trigger a Vercel production deployment. Confirmed: no `target: "production"` deploy was
+  created after the merge timestamp. Most likely cause: transient Vercel webhook delivery
+  failure (possibly compounded by Hobby plan rate limits). Remedy: Vercel → project →
+  Deployments → open any recent deploy from that PR's branch → ⋯ → Promote to Production.
+  Workaround ✗ note added to step 7 in all 4 copies.
 - **Verified Jun 2026 — prefix IS configurable and bridges are retired:** Supabase dashboard
   → Project → Settings → Integrations → Vercel → Manage → Customize prefix — field-verified
   Jun 2026; supabase/supabase PR #28058 merged Jul 2024. Step 8.3 added to all three

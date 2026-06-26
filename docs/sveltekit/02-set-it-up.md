@@ -36,10 +36,12 @@ guards the account that controls everything else. Free branch protection needs a
 *public* repo — to stay private, use GitHub Pro/Team.
 
 ## 2. Connect Claude Code
-1. Open Claude Code (claude.ai/code or the desktop **Code** tab); authorize the
-   **Claude GitHub App** — and on GitHub's install screen, choose **Only select
-   repositories → this repo** (a cloud session can reach any repo the connection
-   can see, so grant it just this one).
+1. Go to claude.ai/code or the desktop **Code** tab; on first visit, connect
+   your GitHub account when prompted (accept the default permissions — the GitHub
+   App's install scope does not restrict which repos a cloud session can open;
+   session access follows your GitHub account). Each session: pick this repo from
+   the **repository selector** below the input box *(Verified Jun 2026 —
+   code.claude.com/docs/en/claude-code-on-the-web)*.
 2. Use a **Remote (cloud)** environment; start sessions from **`main`**; turn on
    **plan mode** (the mode picker in the prompt box — in the CLI, Shift+Tab
    cycles to it); run the session on the **most capable model** — this is the one
@@ -63,7 +65,8 @@ guards the account that controls everything else. Free branch protection needs a
 PRs but can't merge.
 
 **✓** ask it to "add a one-line comment to the README" — within a minute a PR
-appears from a `claude/…` branch. If no PR appears, re-authorize the GitHub App.
+appears from a `claude/…` branch. If no PR appears, confirm this repo is
+selected in the session's repository selector and re-authorize if needed.
 
 ## 3. Create the Supabase project
 1. supabase.com → **New project**; save the **database password** (you won't see it
@@ -288,6 +291,12 @@ wasn't empty — make a fresh one.
 Supabase connection. Previews won't have credentials until step 8 connects the
 integration.
 
+**✗** a merge to `main` doesn't trigger a Vercel production deployment — go to
+**Vercel → project → Deployments**, open any recent deployment from that PR's
+branch, then click **⋯ → Promote to Production** (triggers a full rebuild using
+production environment variables; webhook delivery failures on merge have been
+reported in Vercel's community forums and incident history).
+
 **↑ Upgrade — commercial / collaborators:** Vercel Hobby is **non-commercial**,
 and on a **private repo it refuses deployments from any commit author who isn't
 the team owner** — so a second person (or a differently-attributed bot) breaks
@@ -302,8 +311,10 @@ rollback). The flow is unchanged.
    and make sure your Supabase project is linked to this Vercel project.
 3. In **Supabase → Project → Settings → Integrations → Vercel**, click **Manage**
    on your connection and change **Prefix** from `NEXT_PUBLIC_` to `PUBLIC_` →
-   **Save** (previews now receive the same `PUBLIC_` names you set in step 7.2 —
-   production was already using them).
+   **Save**; while here, confirm **Preview** and **Development** are **OFF** —
+   leave them off: Supabase Branching injects each PR's own preview credentials
+   separately via the GitHub webhook; turning Preview ON would incorrectly
+   overwrite each preview's branch credentials with the main project's credentials.
 4. Back in Vercel's **Environment Variables**, delete any **Production**-scoped
    variable whose name contains `SECRET`, `SERVICE_ROLE`, `JWT`, or `POSTGRES` —
    nothing in this stack uses them there. Leave the branch-scoped ones the
@@ -312,18 +323,25 @@ rollback). The flow is unchanged.
    themselves when the PR closes.
 
 *Note:* production values are scoped to **Production only** and carry the `PUBLIC_`
-names you typed. Each PR's preview gets its **own** values from the integration
-when a PR opens or a commit is pushed, injected under the same `PUBLIC_` names
-(step 8.3 set the prefix) — `hooks.server.ts` reads `PUBLIC_SUPABASE_URL` and
-`PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY` server-side and
-passes the values to the browser via the layout load, so nothing needs configuring
-on either dashboard. Two health signs on any open PR: its **Supabase Preview**
-check is green (not *skipped*), and about a minute after the first build the
-integration redeploys the preview by itself — that auto-redeploy is the visible
-sign the sync ran.
+names you typed (Production toggle ON, Preview and Development OFF is the correct
+and intended state — Branching manages per-PR preview credentials independently,
+so Preview ON would break previews by overwriting their branch credentials with
+the main project's; Verified Jun 2026 — supabase.com discussion #32596). Each
+PR's preview gets its **own** credentials when a PR opens or a commit is pushed:
+the integration injects `PUBLIC_SUPABASE_URL` and either
+`PUBLIC_SUPABASE_PUBLISHABLE_KEY` (new Supabase projects, Nov 2025+) or
+`PUBLIC_SUPABASE_ANON_KEY` (legacy projects) *(Verified Jun 2026 — supabase.com
+discussions #29260, #40717)* — `hooks.server.ts` reads the URL the same way in
+all environments; production uses `PUBLIC_SUPABASE_PUBLISHABLE_KEY` (what you
+set manually in step 7.2); previews receive whichever key the integration
+provides — the `?? PUBLIC_SUPABASE_ANON_KEY` fallback handles legacy projects;
+new projects have `PUBLIC_SUPABASE_PUBLISHABLE_KEY` injected directly. Two health signs on any open PR:
+its **Supabase Preview** check is green (not *skipped*), and about a minute after
+the first build the integration redeploys the preview by itself — that
+auto-redeploy is the visible sign the sync ran.
 
 **✓** open one test PR; while it is open, **Vercel → Settings → Environment
-Variables** shows `PUBLIC_SUPABASE_*` entries scoped to **Preview** with that
+Variables** shows `PUBLIC_SUPABASE_URL` and either `PUBLIC_SUPABASE_PUBLISHABLE_KEY` or `PUBLIC_SUPABASE_ANON_KEY` entries scoped to **Preview** with that
 branch's name (created at PR-open or on push, deleted when the PR merges or closes — checking
 after a merge always shows nothing), and the preview page renders.
 
@@ -656,10 +674,10 @@ Audit this repo against the baseline manifest and report — fix nothing: root C
    this ruleset JSON at .github/main-ruleset.json so new projects import it
    instead of re-clicking the ruleset UI. Open a PR into main.`
 4. **Every next project:** on the template repo, click **Use this template →
-   Create a new repository** → grant the Claude GitHub App access to it
-   (github.com → **Settings → Applications → Claude → Repository access** → add
-   the new repo — step 2.1 granted only-selected repos, so each new one must be
-   added) → redo step 10.2's settings (auto-delete OFF, Allow auto-merge ON, Dependabot
+   Create a new repository**; then start a new cloud session and select the new
+   repo from the **repository selector** below the input box (if the repo doesn't
+   appear, add it at github.com → **Settings → Applications → Claude →
+   Repository access**) → redo step 10.2's settings (auto-delete OFF, Allow auto-merge ON, Dependabot
    security updates ON, self-hosted runners OFF — templates copy files, never settings) → set the new cloud env's
    network per step 2.3 (Custom + the default-package-managers box +
    `cdn.playwright.dev`) → do step 3 (new Supabase project) and step 7 (new Vercel

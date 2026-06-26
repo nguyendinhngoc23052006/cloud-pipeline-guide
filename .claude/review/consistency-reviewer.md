@@ -1,25 +1,17 @@
-# consistency-reviewer verdict — 2026-06-26
+# consistency-reviewer verdict — PR: connectors/vercel-deploy/supabase-toggles (Jun 2026)
 
-**PR:** Phase-first step ordering in Part 2 (12 → 14 steps)
+**Result: PASS**
 
-**Status:** PASS (with two acknowledged design exceptions and one fixed broken anchor)
+All seven changed sections checked across all four framework copies (vite, next, astro, sveltekit):
 
-**Findings:**
+1. **Step 2.1 connector flow** — byte-identical across all 4. ✓
+2. **Step 2 ✓ check line** — byte-identical across all 4. ✓
+3. **Step 7 ✗ Promote-to-Production block** — byte-identical across all 4. ✓
+4. **Step 8.3 toggle state note** — present and correct in Vite/Astro/SvelteKit; correctly absent in Next.js (no prefix-change sub-step needed). ✓
+5. **Step 8 Note** — structurally parallel; Next.js legitimately differs (same `NEXT_PUBLIC_` prefix for production and preview; no separate client-file name to cite). ✓
+6. **Step 8 ✓** — structurally parallel with only prefix differing (`VITE_`, `NEXT_PUBLIC_`, `PUBLIC_`, `PUBLIC_`). ✓
+7. **Step 14.4 repository selector instruction** — byte-identical across all 4. ✓
 
-**FIXED — Broken anchor in root CLAUDE.md:24**
-The link `[Part 2, step 3](docs/vite/02-set-it-up.md#3-create-the-rulebook)` pointed to a non-existent heading after the restructuring. The rulebook creation is now step 4. Fixed to `[Part 2, step 4](docs/vite/02-set-it-up.md#4-create-the-rulebook)`.
+No broken anchors, mismatched step numbers, or connected-line violations found.
 
-**FIXED — docs/CLAUDE.md framework-specific step listing incomplete**
-"steps 4, 5, 7.2" omitted step 8 (the Supabase↔Vercel integration, which differs by framework: 4 sub-steps for vite/astro/sveltekit, 3 for next). Fixed to include step 8.
-
-**DESIGN EXCEPTION — Intro table secret-key row (all 4 copies, line 26)**
-The intro table row for the secret key cites "(step 8.4)" in vite/astro/sveltekit and "(step 8.3)" in next, because the "delete secrets" sub-step is numbered differently (next has 3 sub-steps, others have 4). This is intentional framework-specific content in the shared zone — an acknowledged exception to the byte-identical rule for the intro table.
-
-**DESIGN EXCEPTION — Step 3 note "redo steps" range (all 4 copies, line 81)**
-Step 3 note says "redo step 6 and steps 8.1–8.3" in vite/astro/sveltekit and "redo step 6 and steps 8.1–8.2" in next. Same framework-specific exception — correct per framework, intentional.
-
-**No cross-copy drift in shared sections** (steps 1, 2, 3, 6, 9–14 body content).
-
-**Step refs consistent** across 01, 06, 07, MEMORY.md, docs/CLAUDE.md after fixes.
-
-**Verdict:** PASS after fixes.
+*Note: The Next.js Memory-section example in the embedded app CLAUDE.md (step 5, line ~163) omits the "after step 8.3" citation the other three copies include. Not a structural error (inside a freeform example string), but if that step number changes the Next.js copy won't have a trigger to update it.*
