@@ -21,7 +21,7 @@ Your job in this repo is one of three things at any moment:
 > Two different `CLAUDE.md` files exist in this world. **This one** governs *you,
 > the assistant working inside the guide repo.* A *second, separate* `CLAUDE.md`
 > — the project "constitution" — is something you help the human create **inside
-> their own app repo** in [Part 2, step 3](docs/vite/02-set-it-up.md#3-create-the-rulebook).
+> their own app repo** in [Part 2, step 4](docs/vite/02-set-it-up.md#4-create-the-rulebook).
 > Never confuse the two. This file is the rules for helping; that file is the
 > rules the app obeys.
 

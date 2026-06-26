@@ -1,29 +1,21 @@
 # accuracy-reviewer verdict — 2026-06-26
 
+**PR:** Phase-first step ordering in Part 2 (12 → 14 steps)
+
 **Status:** PASS
 
-**Scope:** Step 6.7 parenthetical in `docs/vite/02-set-it-up.md:280–281`,
-`docs/astro/02-set-it-up.md:280–281`, `docs/sveltekit/02-set-it-up.md:280–281`.
+**Scope:** docs/vite/02-set-it-up.md (spot-check), docs/vite/07-decision-log.md (new bullet), MEMORY.md (new entry).
 
 **Claims checked:**
 
-1. "previews now receive the same `[PREFIX]` names you set in step 6.2" — direct logical
-   consequence of step 6.7's action (changing the integration's prefix to match the
-   framework-native prefix). The integration's prefix configurability is already verified:
-   `*(docs + field, Jun 2026; supabase/supabase PR #28058 merged Jul 2024)*`. No new
-   external platform claim introduced — PASS.
+1. Platform claims in 02-set-it-up.md — all inherit verification from the decision log's Jun 2026 entries, which are current (within 6-month window from 2026-06-26). No new unverified platform claims introduced by the step reordering.
 
-2. "production was already using them" — refers to the vars manually set at step 6.2
-   under the framework-native prefix names (e.g. `VITE_SUPABASE_URL`). Production was
-   already reading those names before step 6.7; step 6.7 makes previews match. This is a
-   logical inference from the documented setup, not a new platform assertion — PASS.
+2. New decision log bullet "Phase-first step ordering in Part 2 (Jun 2026)" — makes no platform claims; records only internal ordering logic and step-number shifts. No Verified stamp needed.
 
-**Supporting evidence:** The step 6 *Note* (lines 289–292 in each copy) independently
-confirms: "production values are scoped to Production only and carry the `VITE_` names
-you typed. Each PR's preview gets its own values from the integration … injected under
-the same `VITE_` names (step 6.7 set the prefix)." The parenthetical is consistent
-with this already-published description.
+3. New MEMORY.md entry "Phase-first step ordering in Part 2 (Jun 2026)" — same; no platform claims.
 
-**No unverified platform claim introduced.**
+**Pre-existing flags (not introduced by this PR):**
+- docs/vite/02-set-it-up.md:281 — "the default for new projects" for Vercel Branch Tracking pointing at `main` lacks an explicit stamp. Pre-existing; not changed by this PR.
+- docs/vite/02-set-it-up.md:283 — "Vercel enables it by default on new projects" for Vercel Authentication. Pre-existing; not changed by this PR.
 
-**Verdict:** PASS.
+**Verdict:** PASS. No new unverified platform claims introduced.

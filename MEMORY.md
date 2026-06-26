@@ -18,19 +18,19 @@ start of every task, and record decisions, root causes, and gotchas as you go.
 
 ## Per-framework env wiring (the only real delta)
 - The Supabase→Vercel integration's per-connection prefix is configurable (Supabase →
-  Project → Settings → Integrations → Vercel → Manage → Customize prefix — step 6.7,
-  AFTER step 6.5 installs the marketplace app, because the connection doesn't exist until then).
+  Project → Settings → Integrations → Vercel → Manage → Customize prefix — step 8.3,
+  AFTER step 8.1 installs the marketplace app, because the connection doesn't exist until then).
   Set it to the framework's native prefix; production and preview then share the same names,
   and no cross-prefix fallback is needed.
-  - **Vite**: native `VITE_`; step 6.7 sets integration prefix to `VITE_`; `envPrefix:
+  - **Vite**: native `VITE_`; step 8.3 sets integration prefix to `VITE_`; `envPrefix:
     ['VITE_']`; read `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY ?? VITE_SUPABASE_ANON_KEY`; no fallback.
   - **Next.js**: native `NEXT_PUBLIC_` — the integration default already matches; no
     change to prefix needed; NO fallback and NO envPrefix.
-  - **Astro**: native `PUBLIC_`; step 6.7 sets integration prefix to `PUBLIC_`; SERVER
+  - **Astro**: native `PUBLIC_`; step 8.3 sets integration prefix to `PUBLIC_`; SERVER
     (middleware) reads `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
     PUBLIC_SUPABASE_ANON_KEY` from `process.env`; passes public values to islands —
     NO `vite.envPrefix` (that override has a known Astro breakage, issue #10406).
-  - **SvelteKit**: native `PUBLIC_`; step 6.7 sets integration prefix to `PUBLIC_`;
+  - **SvelteKit**: native `PUBLIC_`; step 8.3 sets integration prefix to `PUBLIC_`;
     SERVER (hooks.server.ts) reads `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
     PUBLIC_SUPABASE_ANON_KEY` from `process.env`; passes values via root layout load.
 
@@ -57,9 +57,9 @@ start of every task, and record decisions, root causes, and gotchas as you go.
   fallback chain covers both; issue #38984 remains open but resolved in practice.
 - **Verified Jun 2026 — prefix IS configurable and bridges are retired:** Supabase dashboard
   → Project → Settings → Integrations → Vercel → Manage → Customize prefix — field-verified
-  Jun 2026; supabase/supabase PR #28058 merged Jul 2024. Step 6.7 added to all three
+  Jun 2026; supabase/supabase PR #28058 merged Jul 2024. Step 8.3 added to all three
   non-Next frameworks (Vite → `VITE_`, Astro → `PUBLIC_`, SvelteKit → `PUBLIC_`; Next.js
-  — no change needed); placed after step 6.5 (marketplace install), not step 5. The `NEXT_PUBLIC_` prefix bridge workarounds (fallback chains in Vite/Astro/
+  — no change needed); placed as step 8.3 (after step 8.1 marketplace install). The `NEXT_PUBLIC_` prefix bridge workarounds (fallback chains in Vite/Astro/
   SvelteKit, close/reopen ✗ instruction in all 4) retired in this PR across all copies.
 - **Arrow-rule fix Jun 2026:** three `→`-chained bullets in the constitution block of
   `02-set-it-up.md` (Memory "Cycle", "Worked/failed"; Your place "Flow") rewritten as full
@@ -67,16 +67,23 @@ start of every task, and record decisions, root causes, and gotchas as you go.
 - **"Renaming the project" section added Jun 2026** to all 4 `docs/<framework>/06-keeping-it-current.md`
   copies (byte-identical, framework-neutral). Verified: GitHub redirects break if old
   name reused (docs); Supabase branch sync breaks until reconnected via Organization →
-  Integrations → GitHub Connections (same path as step 5.6); Vercel Deployment Checks
+  Integrations → GitHub Connections (same path as step 6); Vercel Deployment Checks
   unaffected by rename (track CI job names). `*.vercel.app` URL change on Vercel rename
   and Supabase→Vercel integration re-link behavior: not doc-verified (KB 403'd) — step
   5 is marked optional and uses safe "replace with the new URL" framing.
-- **Biome replaces ESLint + Prettier Jun 2026** in scaffold prompt (step 4) and E2E
-  prompt (step 8.6) across all 4 framework copies. `lint` script name unchanged (CI
+- **Biome replaces ESLint + Prettier Jun 2026** in scaffold prompt (step 5) and E2E
+  prompt (step 10.6) across all 4 framework copies. `lint` script name unchanged (CI
   contract). Decision log entries added. Accuracy reviewer flagged: don't assert specific
   biome.json config keys in prompts — let Claude resolve them at scaffold time.
-- **Depot CI accelerator added Jun 2026** as an ↑ Upgrade in step 8 across all 4 copies.
+- **Depot CI accelerator added Jun 2026** as an ↑ Upgrade in step 10 across all 4 copies.
   Integration is `runs-on: depot-ubuntu-latest` (label change only). Verified speed:
   3x builds, 10x cache, sub-5s startup (depot.dev/docs/github-actions/overview).
   Editing reviewer flagged: arrows in numbered steps must connect only literal on-screen
   labels — prose after the last label uses semicolon, not arrow.
+- **Phase-first step ordering in Part 2 (Jun 2026).** Part 2 restructured from 12 to 14
+  steps. Supabase project creation (step 3) now precedes the scaffold (step 5) and Vercel
+  import (step 7), since it depends only on the repo (step 1). Supabase↔GitHub connection
+  (step 6) still precedes Vercel import (auto-creates preview branches at PR-open).
+  Supabase↔Vercel integration (step 8, 4 sub-steps for Vite/Astro/SvelteKit; 3 for Next.js)
+  still follows Vercel import. Old step 12 (template) is now step 14. All step references
+  updated across 02, 06, 07, MEMORY.md, docs/CLAUDE.md.

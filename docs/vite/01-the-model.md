@@ -35,7 +35,7 @@ throwaway `claude/…` branch that becomes a PR.
   never hand-edit a database.
 - **Two keys** — the *publishable* key is browser-safe; the *secret* key is
   server-only and you never paste it anywhere. (The branch-scoped preview copies
-  that the integration syncs are fine — step 6.7 explains.)
+  that the integration syncs are fine — step 8.3 explains.)
 - **Tools enforce** — GitHub blocks unreviewed or failing merges, Vercel blocks
   bad builds, Supabase rebuilds from the files, and a committed Stop hook polices
   Claude's own checklist locally.
@@ -43,7 +43,7 @@ throwaway `claude/…` branch that becomes a PR.
 **The env-var names are a contract.** The browser only sees variables carrying a
 public prefix **Vite** exposes (`envPrefix`). This stack exposes one: `VITE_` —
 the values you set by hand in Vercel (production) and the values the Supabase
-integration injects into previews share this prefix (step 6.7 sets it). The
+integration injects into previews share this prefix (step 8.3 sets it). The
 contract lives in `vite.config.ts` (`envPrefix: ['VITE_']`),
 `src/lib/supabaseClient.ts`, `.env.example`, and the Vercel production variable
 names — these four all use `VITE_`, so a change to any one moves all of them in

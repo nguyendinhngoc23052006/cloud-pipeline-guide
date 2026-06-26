@@ -40,7 +40,7 @@ every part that depends on it in the same PR (later needs earlier).
 
 **Arrives as a PR (you just review and merge, like any other PR):**
 - npm dependencies and GitHub Actions versions — Dependabot opens grouped weekly
-  PRs, plus security patches the moment a CVE lands (the step 8.2 toggle is what
+  PRs, plus security patches the moment a CVE lands (the step 10.2 toggle is what
   turns those on). *(docs, Jun 2026)*
 - Claude's memory and lessons — they ride the PRs Claude already opens.
 
@@ -64,7 +64,7 @@ file, restates it, and confirms before deleting — so it can never take out the
 wrong thing — and moves every dependent part in the same PR.
 
 ### CLAUDE.md rules (the project constitution)
-*Lives in `CLAUDE.md` at the app repo root · created in step 3.* It is
+*Lives in `CLAUDE.md` at the app repo root · created in step 4.* It is
 **read-only** — Claude proposes, you merge; it never self-edits.
 
 ```text
@@ -72,7 +72,7 @@ Propose a rule change: the CLAUDE.md rule whose job is <…>. Resolve my intent 
 ```
 
 ### Reviewer agents + the researcher worker
-*Live in `.claude/agents/` (each with a memory sidecar) · created in step 7.*
+*Live in `.claude/agents/` (each with a memory sidecar) · created in step 9.*
 Floor that can never be deleted: `security-reviewer`, `code-reviewer`,
 `scale-reviewer`.
 
@@ -81,7 +81,7 @@ Floor that can never be deleted: `security-reviewer`, `code-reviewer`,
 ```
 
 ### Self-improvement hooks
-*Live in `.claude/settings.json` (+ their scripts) · created in step 7.* The
+*Live in `.claude/settings.json` (+ their scripts) · created in step 9.* The
 SessionStart hook loads memory; the Stop/SubagentStop hook polices the checklist.
 
 ```text
@@ -90,23 +90,23 @@ SessionStart hook loads memory; the Stop/SubagentStop hook polices the checklist
 
 ### Command skills
 *Live in `.claude/skills/<name>/SKILL.md`, invoked as `/name` · created in step
-10* (`/prototype`, `/test`, `/verify`, `/revert`).
+12* (`/prototype`, `/test`, `/verify`, `/revert`).
 
 ```text
 <Add|Update|Delete> the skill whose job is <…>. Resolve my intent to the exact .claude/skills/<name>/SKILL.md and restate it; if it matches none or several, ask first; confirm before any delete. A skill is invoked as /name and auto-invocable by Claude; keep its YAML frontmatter (name + proactive description). Open ONE PR into main with the Self-check and the "For you" block.
 ```
 
 ### Workflows (CI and the gates)
-*Live in `.github/workflows/` · created in step 8* (`ci.yml` → jobs `tests`,
+*Live in `.github/workflows/` · created in step 10* (`ci.yml` → jobs `tests`,
 `lint`, `typecheck`; `branch-cleanup.yml`; `uptime.yml`; `e2e.yml` → job `e2e`;
 optional `claude-review.yml`, `canary.yml`).
 
 ```text
-<Add|Update|Delete> the workflow whose job is <…>. Resolve my intent to the exact .github/workflows/<file>.yml and restate it; if it matches none or several, ask first; confirm before any delete. The job names tests/lint/typecheck/e2e are a CI contract the ruleset requires — if you rename or remove a required job, update it AND tell me to reselect it in the ruleset (step 9) and in Vercel Deployment Checks if I added them, in the same PR. Open ONE PR into main with the Self-check and the "For you" block.
+<Add|Update|Delete> the workflow whose job is <…>. Resolve my intent to the exact .github/workflows/<file>.yml and restate it; if it matches none or several, ask first; confirm before any delete. The job names tests/lint/typecheck/e2e are a CI contract the ruleset requires — if you rename or remove a required job, update it AND tell me to reselect it in the ruleset (step 11) and in Vercel Deployment Checks if I added them, in the same PR. Open ONE PR into main with the Self-check and the "For you" block.
 ```
 
 ### MCP servers (read-only eyes)
-*Live in `.mcp.json` (project scope) · added in the step 7 upgrade.*
+*Live in `.mcp.json` (project scope) · added in the step 9 upgrade.*
 
 ```text
 <Add|Update|Delete> the MCP server whose job is <…>. Resolve my intent to the exact entry in .mcp.json and restate it; if it matches none or several, ask first; confirm before any delete. MCP servers are read-only/observability ONLY — never write, deploy, or merge to production; scope the Supabase server to this project and keep its read-only flag. Open ONE PR into main with the Self-check and the "For you" block.
@@ -115,8 +115,8 @@ optional `claude-review.yml`, `canary.yml`).
 ### The env-name contract
 *Spans `hooks.server.ts`, `src/routes/+layout.server.ts` / `+layout.ts`,
 `.env.example`, the Vercel **Production** variable names, and the prefix in Supabase →
-Project → Settings → Integrations → Vercel → Manage · set in steps 4 and 6.*
-The textbook connected line: all four use the `PUBLIC_` prefix (step 6.7 configures
+Project → Settings → Integrations → Vercel → Manage · set in steps 5 and 7.*
+The textbook connected line: all four use the `PUBLIC_` prefix (step 8.3 configures
 the integration to inject `PUBLIC_` into previews, matching production), so a change
 to any one moves all of them or none.
 
@@ -137,7 +137,7 @@ PR prompt names the new repo.
    the renamed repo → **Save**.
 3. Supabase → **Organization → Integrations → GitHub Connections** — remove the
    old repo connection and reconnect to the renamed repo (same path as Part 2
-   step 5.6; existing connections silently keep pointing at the old name with no
+   step 6; existing connections silently keep pointing at the old name with no
    error shown anywhere).
 4. Vercel → **project → Settings → Git** — disconnect and reconnect to the
    renamed repo.
@@ -183,7 +183,7 @@ verdicts into the stamps here.
 These exist only because a platform hasn't closed a gap yet; each retires the day
 its **Retire when…** comes true. To retire one, paste the management prompt below
 (it removes the code *and* its table row together — the connected-line rule);
-without the Routine (step 11), run the refresh prompt on this table every few
+without the Routine (step 13), run the refresh prompt on this table every few
 months yourself to re-stamp the **Verified** column.
 
 ```text

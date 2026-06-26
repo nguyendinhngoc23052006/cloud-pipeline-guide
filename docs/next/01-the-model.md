@@ -35,7 +35,7 @@ throwaway `claude/…` branch that becomes a PR.
   never hand-edit a database.
 - **Two keys** — the *publishable* key is browser-safe; the *secret* key is
   server-only and you never paste it anywhere. (The branch-scoped preview copies
-  that the integration syncs are fine — step 6.7 explains.)
+  that the integration syncs are fine — step 8 explains.)
 - **Tools enforce** — GitHub blocks unreviewed or failing merges, Vercel blocks
   bad builds, Supabase rebuilds from the files, and a committed Stop hook polices
   Claude's own checklist locally.

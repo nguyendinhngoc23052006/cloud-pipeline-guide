@@ -1,7 +1,7 @@
 # Part 2 — Set it up
 
 > **This part guides you to:** wire GitHub, Claude Code, Supabase, and Vercel
-> into one gated pipeline, in 12 dependency-ordered steps. Needs Part 1's model.
+> into one gated pipeline, in 14 dependency-ordered steps. Needs Part 1's model.
 > Every later part assumes this is done.
 
 > One-time setup. Do the steps **in order**; don't start one until the last
@@ -9,8 +9,8 @@
 > italic *note* is the one thing worth knowing.
 
 You're wiring four tools into one line — authorize each link once and they run
-themselves afterward. Steps 1–11 build your first project *and* the reusable
-template; step 12 makes every next project a 30-minute recipe.
+themselves afterward. Steps 1–13 build your first project *and* the reusable
+template; step 14 makes every next project a 30-minute recipe.
 - **Claude Code ↔ GitHub** — Claude opens PRs (the GitHub App).
 - **repo ↔ Supabase** — every PR gets its own preview database; merging migrates
   production.
@@ -23,7 +23,7 @@ template; step 12 makes every next project a 30-minute recipe.
 | Value | Where to get it | Where it goes |
 |---|---|---|
 | Project URL + publishable key (`sb_publishable_…`) | Supabase project **home page → Copy ⌄** | Vercel, **Production** scope |
-| Secret key (`sb_secret_…`) | Supabase only | you never paste it anywhere — never code, Git, or Production-scoped Vercel (step 6.7) |
+| Secret key (`sb_secret_…`) | Supabase only | you never paste it anywhere — never code, Git, or Production-scoped Vercel (step 8.4) |
 | Project ID / DB password | — | never pasted into the pipeline (keep the password in your password manager) |
 
 ## 1. Create the GitHub repo
@@ -44,13 +44,13 @@ guards the account that controls everything else. Free branch protection needs a
    **plan mode** (the mode picker in the prompt box — in the CLI, Shift+Tab
    cycles to it); run the session on the **most capable model** — this is the one
    place a model is chosen: it sets the **orchestrator's** tier, and the
-   orchestrator dispatches every subagent (step 7) on a tier below itself.
+   orchestrator dispatches every subagent (step 9) on a tier below itself.
 3. Set **Network = Custom**; tick **Also include default list of common package
    managers** (this keeps the Trusted defaults — npm, PyPI, GitHub, cloud SDKs —
    so `npm ci` still works) and add `cdn.playwright.dev` to **Allowed domains**
    (the sandbox installs Playwright's Chromium from it for the E2E suite, step
-   8.6). Allowlist changes apply only to newly-created containers, so set this
-   before the session that builds step 8; Trusted is a fixed list that can't take
+   10.6). Allowlist changes apply only to newly-created containers, so set this
+   before the session that builds step 10; Trusted is a fixed list that can't take
    additions, which is why this uses Custom.
 4. **Leave the setup script empty** — the image already has Node/npm and `npx`
    fetches the Supabase CLI; a failing `npm install` here breaks startup.
@@ -65,7 +65,26 @@ PRs but can't merge.
 **✓** ask it to "add a one-line comment to the README" — within a minute a PR
 appears from a `claude/…` branch. If no PR appears, re-authorize the GitHub App.
 
-## 3. Create the rulebook
+## 3. Create the Supabase project
+1. supabase.com → **New project**; save the **database password** (you won't see it
+   again); pick the nearest region.
+2. Make sure it's a **brand-new, empty project**.
+3. Upgrade to **Pro** (Settings → Billing).
+4. On the project **home page**, click **Copy ⌄** next to the URL; copy the
+   **Project URL** and **publishable key**.
+5. **Settings → Add-ons → Point-in-Time Recovery →** enable.
+
+*Note:* the project must start **empty** — Supabase Branching replays your
+migration files onto a fresh copy for every PR, and it can't do that if the
+schema already exists. The database password is shown only once; store it in your
+password manager now. If you ever recreate the Supabase project or rename the
+repo, redo step 6 and steps 8.1–8.3 — existing connections silently keep pointing
+at the old identity and sync nothing, with no error shown anywhere.
+
+**✓** the project home page shows the Project URL and publishable key you copied
+in step 3.4.
+
+## 4. Create the rulebook
 1. In Claude Code, paste this:
 
 ```text
@@ -109,7 +128,7 @@ You are the senior DevOps engineer and **orchestrator** of four tools as one sys
 - One responsibility per file, ~200 lines; edit before creating.
 - A startup failure (e.g. missing Supabase config) renders as visible text in the page, never a blank screen — a deployment never shows a blank page.
 - Components render UI; data access and validation live in `src/services/`.
-- Read Supabase config on the SERVER (in `src/middleware.ts`, from `process.env`): read `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY` (step 6.7 sets the integration's prefix to `PUBLIC_` so previews inject the same names as production). A client island that needs Supabase gets the public URL + key passed from the server, never reading env itself. Never hardcode. The contract spans the Supabase client + `src/middleware.ts`, `.env.example`, and the Vercel production variable names — all using `PUBLIC_`; if the stack changes, move all of it in ONE PR.
+- Read Supabase config on the SERVER (in `src/middleware.ts`, from `process.env`): read `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY` (step 8.3 configures the integration to inject `PUBLIC_`-named vars into previews, matching production). A client island that needs Supabase gets the public URL + key passed from the server, never reading env itself. Never hardcode. The contract spans the Supabase client + `src/middleware.ts`, `.env.example`, and the Vercel production variable names — all using `PUBLIC_`; if the stack changes, move all of it in ONE PR.
 - Folders: `src/pages` (routes + endpoints) · `src/components` (UI) · `src/hooks` (logic) · `src/services` (data + validation) · `src/lib` (incl. the Supabase client) · `src/middleware.ts` (server client + session on `locals`) · `src/types` · `supabase/migrations` (one SQL file per change) · `supabase/config.toml` · `supabase/seed.sql`.
 - **Designing structure on request** (`/prototype`, or "set up the project structure"): build it from my description — create only the feature/domain folders the project needs (a CRM → `contacts`, `deals`, `reminders`; a game → `game/{loop,scenes,entities}`), and omit the rest. Every folder gets a real, used starter file — never empty or `.gitkeep` shells. Wire it to the baseline: types in `src/types`, one core migration with RLS per table, reads through the Supabase client in `src/lib`, routes + placeholder components with loading/empty/error states. Record the layout in `docs/ARCHITECTURE.md`. Keep it a skeleton, not finished features. One PR into `main` with the "For you" block.
 
@@ -139,7 +158,7 @@ You are the senior DevOps engineer and **orchestrator** of four tools as one sys
 
 ## Memory (three tiers, self-pruning)
 - `CLAUDE.md` is your **constitution — read-only**; flag rule gaps to me, never self-edit. Learning goes to memory only.
-- One fact per tier, routed by scope: repo `MEMORY.md` = whole-scene facts ("the integration injects PUBLIC_-named vars into previews after step 6.7") · folder `CLAUDE.md` = local wiring ("services/payment.ts re-derives amounts server-side") · agent memory = that agent's own lessons ("flagged a missing index in PR #12; pattern: filtered column"). If a fact fits two tiers, choose the narrowest.
+- One fact per tier, routed by scope: repo `MEMORY.md` = whole-scene facts ("the integration injects PUBLIC_-named vars into previews after step 8.3") · folder `CLAUDE.md` = local wiring ("services/payment.ts re-derives amounts server-side") · agent memory = that agent's own lessons ("flagged a missing index in PR #12; pattern: filtered column"). If a fact fits two tiers, choose the narrowest.
 - Start each task by reading memory, record each decision or root cause as you go, correct a lesson when its code is reverted, and prune to stay under ~200 lines.
 - When something works, the lesson rides the code PR; when it fails, open a memory-only PR for me to merge — never self-merge.
 
@@ -205,19 +224,19 @@ you merge; it never self-edits. To change a rule after setup, see
 [Keeping it current → CLAUDE.md rules](06-keeping-it-current.md#claudemd-rules-the-project-constitution)
 — the place to go whenever you need to update anything in the pipeline.
 
-## 4. Scaffold a thin baseline
+## 5. Scaffold a thin baseline
 1. In Claude Code, paste this:
 
 ```text
 Scaffold a MINIMAL Astro + TypeScript app (SSR: output 'server' with the @astrojs/vercel adapter) that builds green and is ready to connect to Supabase and Vercel — nothing project-specific. Create:
 - astro.config.mjs with output: 'server' and adapter: vercel().
-- src/lib/supabase.ts exporting a createServerClient (from @supabase/ssr) factory that resolves the URL/key server-side from process.env as PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY; throw if URL or key is missing. (Production and previews both inject PUBLIC_ names after step 6.7 — no cross-prefix fallback needed.)
+- src/lib/supabase.ts exporting a createServerClient (from @supabase/ssr) factory that resolves the URL/key server-side from process.env as PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY; throw if URL or key is missing. (Production and previews both inject PUBLIC_ names after step 8.3 — no cross-prefix fallback needed.)
 - src/middleware.ts building the server client from context.cookies (getAll/setAll) and putting it + the session on context.locals; a client island that needs Supabase receives the public URL + key from server-rendered props, never from import.meta.env.
 - A minimal src/pages/ that compiles and renders one page (index.astro). No feature folders yet. If startup throws (e.g. missing Supabase config), render the error message as visible text — a deployment must never show a blank page. No vercel.json (the @astrojs/vercel adapter handles routing; a SPA catch-all rewrite is Vite-SPA-only).
 - Mocked unit tests for the server resolver proving it builds a client from PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY and shows the readable error when they are absent.
 - Run `npx supabase init` for config.toml (do NOT hand-write it). Leave the top-level project_id at its default (the folder name — NOT the remote ref). Set [db.seed] enabled=true, sql_paths=["./seed.sql"].
 - supabase/migrations/<UTC>_init.sql that only enables pgcrypto; supabase/seed.sql empty except a comment. (Auth users, storage buckets, and tables come later, when you build those features.)
-- Biome (single binary replacing ESLint and Prettier; `biome.json` at the root; `lint` script is `biome check .`) + strict TypeScript + Vitest with one passing test. package.json scripts named exactly `lint`, `typecheck`, and `test` (the step 8 `tests` CI job runs `npm test`).
+- Biome (single binary replacing ESLint and Prettier; `biome.json` at the root; `lint` script is `biome check .`) + strict TypeScript + Vitest with one passing test. package.json scripts named exactly `lint`, `typecheck`, and `test` (the step 10 `tests` CI job runs `npm test`).
 - A committed package-lock.json; .github/dependabot.yml (weekly npm + github-actions, grouped; no runner field — Dependabot uses GitHub-hosted runners unless the "Dependabot on self-hosted runners" setting is ON); .env.example with the PUBLIC_SUPABASE_* vars; .gitignore ignoring .env*.
 - A short CLAUDE.md in src/ (one line: components render, services validate — see the root CLAUDE.md folders rule) and in supabase/ (one line: migrations are append-only and UTC-named — see the root migrations rule). Nothing more — they grow via the memory cycle.
 Open a PR into main.
@@ -228,18 +247,11 @@ Open a PR into main.
 *Note:* a thin app that builds green is what Vercel and Supabase connect to
 cleanly. It's deliberately bare — auth, storage, and tables arrive later as their
 own feature PRs. This first merge happens before the gates exist — it's the
-one-time bootstrap (templated projects from step 12 skip this: their gate is up
+one-time bootstrap (templated projects from step 14 skip this: their gate is up
 from the first minute).
 
-## 5. Set up Supabase
-1. supabase.com → **New project**; save the **database password** (you won't see it
-   again); pick the nearest region.
-2. Make sure it's a **brand-new, empty project**.
-3. Upgrade to **Pro** (Settings → Billing).
-4. On the project **home page**, click **Copy ⌄** next to the URL; copy the
-   **Project URL** and **publishable key**.
-5. **Settings → Add-ons → Point-in-Time Recovery →** enable.
-6. Open the repo's connection (**Organization → Integrations → GitHub
+## 6. Connect Supabase→GitHub
+1. Open the repo's connection (**Organization → Integrations → GitHub
    Connections**): set **Working directory `.`**, turn on **Automatic branching**
    + **Deploy to production**, and make sure **"Supabase changes only" is OFF** —
    with it on, a PR touching no `supabase/` files gets no preview database (its
@@ -247,20 +259,18 @@ from the first minute).
    credentials. Off means every PR spins a preview database that bills Pro
    compute hours until it pauses on inactivity — that's the price of every
    preview working.
+
 *Note:* one empty project becomes production *and* a fresh isolated preview
 database per PR; it must start empty because Branching replays your migrations
-onto it. "Working directory `.`" is the repo root (it holds `supabase/`). If you
-ever recreate the Supabase project or rename the repo, redo step 5.6 and
-steps 6.5–6.7 — existing connections silently keep pointing at the old identity
-and sync nothing, with no error shown anywhere.
+onto it. "Working directory `.`" is the repo root (it holds `supabase/`).
 
 **✓** the GitHub Connections page shows your repo linked to the project with
 branching on. If it says production has migrations the repo lacks, the project
 wasn't empty — make a fresh one.
 
-## 6. Set up Vercel (and connect it to Supabase)
-1. vercel.com → **Add New → Project →** import your repo (Astro is auto-detected, so
-   there's nothing to set here — the `@astrojs/vercel` adapter produces the SSR
+## 7. Import to Vercel
+1. vercel.com → **Add New → Project →** import your repo (Astro is auto-detected,
+   so there's nothing to set here — the `@astrojs/vercel` adapter produces the SSR
    build); click **Deploy** without adding anything else (the build is green; the
    page errors at runtime until the variables exist — expected).
 2. **Settings → Environment Variables →** add `PUBLIC_SUPABASE_URL` and
@@ -271,34 +281,10 @@ wasn't empty — make a fresh one.
    the branch is **`main`** (the default for new projects).
 4. **Settings → Deployment Protection →** make sure **Vercel Authentication** is
    **ON** (Vercel enables it by default on new projects).
-5. Open **vercel.com/marketplace/supabase** → **Install**; when prompted, connect
-   it to this Vercel project and sign in to Supabase.
-6. In **Supabase → Organization → Integrations → Vercel**, open the connection
-   and make sure your Supabase project is linked to this Vercel project.
-7. In **Supabase → Project → Settings → Integrations → Vercel**, click **Manage**
-   on your connection and change **Prefix** from `NEXT_PUBLIC_` to `PUBLIC_` →
-   **Save** (previews now receive the same `PUBLIC_` names you set in step 6.2 —
-   production was already using them).
-8. Back in Vercel's **Environment Variables**, delete any **Production**-scoped
-   variable whose name contains `SECRET`, `SERVICE_ROLE`, `JWT`, or `POSTGRES` —
-   nothing in this stack uses them there. Leave the branch-scoped ones the
-   integration creates per PR: they're that preview's own keys, the browser can't
-   read them (only the `PUBLIC_` prefix is exposed to Astro client-side code, and islands receive values passed from the server rather than reading env directly), and they
-   delete themselves when the PR closes.
 
-*Note:* production values are scoped to **Production only** and carry the `PUBLIC_`
-names you typed. Each PR's preview gets its **own** values from the integration when a PR opens or a commit is pushed, injected under the same `PUBLIC_` names (step 6.7 configured the prefix) — `src/middleware.ts` reads `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY` server-side and passes what the browser needs to islands. Two health signs on any open PR: its **Supabase Preview** check
-is green (not *skipped*), and about a minute after the first build the integration
-redeploys the preview by itself — that auto-redeploy is the visible sign the sync
-ran.
-
-**✓** open one test PR; while it is open, **Vercel → Settings → Environment
-Variables** shows `PUBLIC_SUPABASE_*` entries scoped to **Preview** with that
-branch's name (created at PR-open or on push, deleted when the PR merges or closes — checking
-after a merge always shows nothing), and the preview page renders.
-
-**✗** a preview reads the wrong database, or shows the "missing Supabase config"
-text → fix the connection (step 6.6), then push any commit to the PR branch — env sync fires on push and branch creation as well as PR-open; after syncing, the integration redeploys the preview itself.
+*Note:* production is live after step 7.2's redeploy — the app renders with its
+Supabase connection. Previews won't have credentials until step 8 connects the
+integration.
 
 **↑ Upgrade — commercial / collaborators:** Vercel Hobby is **non-commercial**,
 and on a **private repo it refuses deployments from any commit author who isn't
@@ -307,7 +293,42 @@ deploys. When you take payments, run ads, or add a teammate, move to **Vercel
 Pro** (then turn on Rolling Releases + Skew Protection for gradual rollout and
 rollback). The flow is unchanged.
 
-## 7. Set up agents + self-improvement
+## 8. Connect Supabase→Vercel
+1. Open **vercel.com/marketplace/supabase** → **Install**; when prompted, connect
+   it to this Vercel project and sign in to Supabase.
+2. In **Supabase → Organization → Integrations → Vercel**, open the connection
+   and make sure your Supabase project is linked to this Vercel project.
+3. In **Supabase → Project → Settings → Integrations → Vercel**, click **Manage**
+   on your connection and change **Prefix** from `NEXT_PUBLIC_` to `PUBLIC_` →
+   **Save** (previews now receive the same `PUBLIC_` names you set in step 7.2 —
+   production was already using them).
+4. Back in Vercel's **Environment Variables**, delete any **Production**-scoped
+   variable whose name contains `SECRET`, `SERVICE_ROLE`, `JWT`, or `POSTGRES` —
+   nothing in this stack uses them there. Leave the branch-scoped ones the
+   integration creates per PR: they're that preview's own keys, the browser can't
+   read them (only the `PUBLIC_` prefix is exposed to Astro client-side code, and
+   islands receive values passed from the server rather than reading env directly),
+   and they delete themselves when the PR closes.
+
+*Note:* production values are scoped to **Production only** and carry the `PUBLIC_`
+names you typed. Each PR's preview gets its **own** values from the integration
+when a PR opens or a commit is pushed, injected under the same `PUBLIC_` names
+(step 8.3 set the prefix) — `src/middleware.ts` reads `PUBLIC_SUPABASE_URL` and
+`PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY` server-side and
+passes what the browser needs to islands. Two health signs on any open PR:
+its **Supabase Preview** check is green (not *skipped*), and about a minute after
+the first build the integration redeploys the preview by itself — that
+auto-redeploy is the visible sign the sync ran.
+
+**✓** open one test PR; while it is open, **Vercel → Settings → Environment
+Variables** shows `PUBLIC_SUPABASE_*` entries scoped to **Preview** with that
+branch's name (created at PR-open or on push, deleted when the PR merges or closes — checking
+after a merge always shows nothing), and the preview page renders.
+
+**✗** a preview reads the wrong database, or shows the "missing Supabase config"
+text → fix the connection (step 8.2), then push any commit to the PR branch — env sync fires on push and branch creation as well as PR-open; after syncing, the integration redeploys the preview itself.
+
+## 9. Set up agents + self-improvement
 1. Paste this to create the review swarm:
 
 ```text
@@ -356,7 +377,7 @@ still unable to change production. *Customize it later:* see
 [Keeping it current → MCP servers](06-keeping-it-current.md#mcp-servers-read-only-eyes)
 — read-only/observability only.
 
-## 8. Add the repo's workflows
+## 10. Add the repo's workflows
 1. Paste this for the CI gate:
 
 ```text
@@ -389,7 +410,7 @@ Add a permanent GET /health route that does one cheap Supabase round-trip needin
 ```
 
 5. Point the uptime monitor at production so it starts watching — the workflow
-   you just added in step 8.4 ships **dormant** and no-ops until this variable
+   you just added in step 10.4 ships **dormant** and no-ops until this variable
    exists (that's also why a fresh templated repo stays green). `PRODUCTION_URL` is
    your **Vercel** production URL — the public address of your deployed app (its
    `*.vercel.app` domain or your custom domain, the one **Deployments → Visit**
@@ -410,8 +431,8 @@ Create a mocked-network Playwright E2E suite plus its CI gate. Add @playwright/t
 7. Review and merge each PR.
 
 *Note:* the `tests`, `lint`, `typecheck`, and `e2e` jobs are the merge gate from
-day one — they run on every PR and are what the ruleset (step 9) will require;
-they also run on pushes to `main` so the step 9 release-gate upgrade can read
+day one — they run on every PR and are what the ruleset (step 11) will require;
+they also run on pushes to `main` so the step 11 release-gate upgrade can read
 them. The `e2e` job is **mocked-network** — it builds the app against a stub
 Supabase it never reaches, so it's deterministic and needs no preview database or
 secret; keep it mocked, because a required check pointed at a live preview would
@@ -427,7 +448,7 @@ Supabase preview branches clean themselves.
 
 *Customize it later:* see
 [Keeping it current → Workflows](06-keeping-it-current.md#workflows-ci-and-the-gates)
-— renaming a required job means reselecting it in the ruleset (step 9).
+— renaming a required job means reselecting it in the ruleset (step 11).
 
 **↑ Upgrade — independent review on every PR:** the in-build swarm reviews
 Claude's own work; this adds a *separate* reviewer on the PR itself. Get an API
@@ -474,9 +495,10 @@ Deno**: one prompt — `Extract the pure logic of each Edge Function into helper
 modules (a standalone, behavior-preserving refactor PR first if functions already
 exist), and test those helpers with Vitest. Alias the functions' Deno npm:
 specifiers (e.g. npm:fflate, npm:unpdf) to the matching npm packages in your
-Vitest config (or `astro.config.mjs`'s `vite` key) so Vitest runs the logic without
-a Deno runtime — keep the alias versions in lockstep with the npm: strings. Open a PR into main.` No separate CI
-job, no setup-deno, no sandbox exception — it rides the existing `tests` gate.
+Vitest config (or `astro.config.mjs`'s `vite` key) so Vitest runs the logic
+without a Deno runtime — keep the alias versions in lockstep with the npm:
+strings. Open a PR into main.` No separate CI job, no setup-deno, no sandbox
+exception — it rides the existing `tests` gate.
 (Real `deno test` in the sandbox is now reachable by allowlisting `deno.land` in
 step 2.3, but it only adds coverage of the thin handler glue the vitest-aliased
 helpers already exercise — not worth the extra toolchain.)
@@ -494,9 +516,9 @@ Update .github/workflows/ci.yml and .github/workflows/e2e.yml: change every `run
 
 *Note:* the only change is the `runs-on` label — no steps, secrets, or workflow logic change. To roll back, revert both files to `ubuntu-latest`. Check [depot.dev/pricing](https://depot.dev/pricing) before enabling on a private repository. Verified Jun 2026 (depot.dev/docs/github-actions/overview).
 
-## 9. Protect `main`
+## 11. Protect `main`
 1. **GitHub → Settings → Rules → Rulesets → New branch ruleset.** (A templated
-   project from step 12 instead clicks **Import a ruleset** and selects the
+   project from step 14 instead clicks **Import a ruleset** and selects the
    committed JSON — done, skip to the ✓.)
 2. **Enforcement = Active**; **Target branches → include `main`**.
 3. **Require a pull request** → **Required approvals = 1**.
@@ -513,15 +535,15 @@ Update .github/workflows/ci.yml and .github/workflows/e2e.yml: change every `run
 6. **Block force pushes** + **Restrict deletions**.
 7. **Bypass list** → **Add bypass** → **Integration** → search and select
    **Dependabot** → **Pull requests only**; then **Create**. (This lets the
-   auto-merge workflow from step 8.2 skip the approval gate for Dependabot patch
+   auto-merge workflow from step 10.2 skip the approval gate for Dependabot patch
    PRs — CI still runs and must pass.)
 
 *Note:* this is the human gate — Claude opens PRs but can't approve its own. It's
 last because it needs the checks the earlier steps created: `tests`/`lint`/
-`typecheck`/`e2e` come from step 8's workflows, **Supabase Preview** from step 5's
-branching, **Vercel** from step 6's import. The Dependabot bypass waives only the
-approval requirement for patch updates — CI still runs on every Dependabot PR and
-must pass before auto-merge fires.
+`typecheck`/`e2e` come from step 10's workflows, **Supabase Preview** from step
+3's branching, **Vercel** from step 7's import. The Dependabot bypass waives only
+the approval requirement for patch updates — CI still runs on every Dependabot PR
+and must pass before auto-merge fires.
 
 **✓** a PR with a failing check won't merge; trying to merge without an approval
 is blocked. *Two gotchas that quietly un-gate it:* on a **private** repo the
@@ -553,7 +575,7 @@ your Supabase organization, **Team → Invite**. The gate you just built does th
 rest: the required approval now comes from a human who isn't the PR's author, and
 on a private repo GitHub Pro/Team is what makes the ruleset enforce.
 
-## 10. Install the command skills
+## 12. Install the command skills
 Paste each block and merge its PR.
 
 **/prototype — lay out a project:**
@@ -571,7 +593,7 @@ Create .claude/skills/test/SKILL.md with YAML frontmatter (name: test; descripti
 **/verify — check a build:**
 
 ```text
-Create .claude/skills/verify/SKILL.md with YAML frontmatter (name: verify; description: "Walk the human through checking the current PR's preview. Use when a PR is ready for review or when asked to verify.") that, for the current PR: summarizes what changed, runs the three reviewers, confirms the preview is on its own branch DB by checking the PR's "Supabase Preview" check is green (not skipped), that /health returns ok, and that the preview renders the app rather than the "failed to start / missing Supabase config" text — if any fail, route me to step 6's ✗ remedy (fix the connection, then push any commit to the PR branch to retrigger env sync) — exercises the happy AND unhappy paths, and returns a plain-English what-to-click / what-should-happen / what-means-broken. Read-only. Open a PR into main.
+Create .claude/skills/verify/SKILL.md with YAML frontmatter (name: verify; description: "Walk the human through checking the current PR's preview. Use when a PR is ready for review or when asked to verify.") that, for the current PR: summarizes what changed, runs the three reviewers, confirms the preview is on its own branch DB by checking the PR's "Supabase Preview" check is green (not skipped), that /health returns ok, and that the preview renders the app rather than the "failed to start / missing Supabase config" text — if any fail, route me to step 8's ✗ remedy (fix the connection, step 8.2, then push any commit to the PR branch to retrigger env sync) — exercises the happy AND unhappy paths, and returns a plain-English what-to-click / what-should-happen / what-means-broken. Read-only. Open a PR into main.
 ```
 
 **/revert — undo safely:**
@@ -587,7 +609,7 @@ invoke it on its own when relevant.
 [Keeping it current → Command skills](06-keeping-it-current.md#command-skills) —
 each is invoked as `/name`.
 
-## 11. Lay out your project structure
+## 13. Lay out your project structure
 1. In Claude Code, run `/prototype <what it is · who uses it · core entities ·
    scope>`.
 2. Approve the plan it shows you.
@@ -612,12 +634,12 @@ A routine can only push to `claude/…` branches and open PRs — your gate stil
 reviews everything it proposes. Caveats: research preview (may change) and its
 runs share your plan's usage quota.
 
-## 12. Make it a template (every next project becomes a recipe)
+## 14. Make it a template (every next project becomes a recipe)
 The committed files — constitution, scaffold, agents, hooks, workflows, skills —
 are the reusable half of this pipeline; the dashboards are the per-project half.
 Capture the first half once:
 
-1. Build the template repo (one-time): repeat steps 1, 3, 4, 7, 8, and 10 in a
+1. Build the template repo (one-time): repeat steps 1, 4, 5, 9, 10, and 12 in a
    fresh repo (e.g. `pipeline-template`) — no Supabase, Vercel, or ruleset needed
    there, so it's just the prompts and merges. **Never template a finished app**:
    migrations, feature code, and MEMORY.md are project-specific and would poison
@@ -636,13 +658,13 @@ Audit this repo against the baseline manifest and report — fix nothing: root C
    Create a new repository** → grant the Claude GitHub App access to it
    (github.com → **Settings → Applications → Claude → Repository access** → add
    the new repo — step 2.1 granted only-selected repos, so each new one must be
-   added) → redo step 8.2's settings (auto-delete OFF, Allow auto-merge ON, Dependabot
+   added) → redo step 10.2's settings (auto-delete OFF, Allow auto-merge ON, Dependabot
    security updates ON, self-hosted runners OFF — templates copy files, never settings) → set the new cloud env's
    network per step 2.3 (Custom + the default-package-managers box +
-   `cdn.playwright.dev`) → do step 5 (new Supabase project) and step 6 (new Vercel
+   `cdn.playwright.dev`) → do step 3 (new Supabase project) and step 7 (new Vercel
    project) for it → **Settings → Rules → Rulesets → Import a ruleset** → select
    the committed JSON → paste the bootstrap prompt below → merge its PR (fully
-   gated — every check already exists) → set `PRODUCTION_URL` (step 8.5) → run
+   gated — every check already exists) → set `PRODUCTION_URL` (step 10.5) → run
    `/prototype`.
 
 ```text

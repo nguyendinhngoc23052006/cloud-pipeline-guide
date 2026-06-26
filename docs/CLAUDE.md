@@ -8,7 +8,7 @@ framework; a reader follows one folder end to end and never needs another.
   EVERY copy in the same PR. To check drift: diff a part across copies.
 - **Framework-specific parts differ per copy** — touch only that framework's copy:
   the env-name-contract paragraph in 01; the pasted app-`CLAUDE.md` block, the
-  scaffold prompt, and the public env prefix in 02 (steps 3, 4, 6.2); the env-name
+  scaffold prompt, the public env prefix, and the integration sub-step count in 02 (steps 4, 5, 7.2, and 8); the env-name
   contract section + workaround table in 06; the env-seam and testing bullets in 07.
 - **Keep copies parallel** — same step numbers, section headings, and filenames, so
   the README chooser and every cross-reference keep resolving.

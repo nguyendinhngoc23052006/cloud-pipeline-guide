@@ -31,7 +31,7 @@ needs annoying setup for marginal gain, leave it out.**
 - **Setup ordered by dependency:** a thin baseline merges *un-gated* (the gates
   need the app it creates); the gate goes up once the checks exist; the first
   gated change is the project structure. This window exists only in the first
-  project — a templated repo (step 12) has all files on `main` before its first
+  project — a templated repo (step 14) has all files on `main` before its first
   PR, so its gate is active from the start.
 - **The template is the baseline, never a finished app.** Migrations, feature
   code, and memory are project-specific; templating them would replay one app's
@@ -151,7 +151,7 @@ needs annoying setup for marginal gain, leave it out.**
   commits, no open PR) — recency, not merge status, is the safety signal.
 - **Merge discipline — field-corrected Jun 2026 (live incident).** A
   presentational PR merged "green" yet production showed no change and was
-  reverted. Two causes, now reflected in Part 3's Ship note and step 9's ✓: (1)
+  reverted. Two causes, now reflected in Part 3's Ship note and step 11's ✓: (1)
   the merge happened the moment the quick jobs passed, *before* the slower
   **Supabase Preview** check had reported (it failed minutes later) — a
   not-yet-reported check can't block a forced-early merge, and on that **private**
@@ -167,7 +167,7 @@ needs annoying setup for marginal gain, leave it out.**
   Vercel **Deployment Checks** (vercel.com/docs/deployment-checks) are a
   *post-merge* release gate that imports GitHub checks — they are not PR checks and
   there are no native lint/typecheck toggles, so lint/typecheck run as GitHub
-  Actions jobs and the import is offered as the step 9 upgrade. The Supabase→Vercel
+  Actions jobs and the import is offered as the step 11 upgrade. The Supabase→Vercel
   integration's **per-connection prefix is configurable** (Supabase → Project →
   Settings → Integrations → Vercel → Manage → Customize prefix — field-verified
   Jun 2026; supabase/supabase PR #28058 merged Jul 2024); for Next.js the default
@@ -224,13 +224,14 @@ needs annoying setup for marginal gain, leave it out.**
   merge, hand edits to production — are each blocked by an existing rule: never edit
   a merged migration, one schema change in flight, never touch a DB by hand.
 - **Biome replaces ESLint + Prettier (Jun 2026, biomejs.dev).** Single binary, one `biome.json` config, ~10–25× faster than ESLint + Prettier in CI. The `lint` script runs `biome check .` (read-only, CI-safe); `biome check --write .` fixes locally. Type-aware TS coverage is partial — no official overall percentage published by the team; individual rule detection can be as low as 75% for specific rules — accepted because the gap is narrow for standard TypeScript apps and the speed and simplicity gains are significant. The `lint` script name is unchanged; it remains the CI contract.
-- **Depot as an opt-in CI accelerator (Jun 2026, depot.dev/docs/github-actions/overview).** Added as an ↑ Upgrade in step 8, not a core step: it requires a separate account and pricing varies by plan for private repos. The integration is one `runs-on` label change per job (`ubuntu-latest` → `depot-ubuntu-latest`); no workflow logic changes. Verified figures from that doc: up to 3× faster build execution; cache upload/download at ~1,000 MiB/s vs GitHub's ~145 MiB/s (10× faster throughput); sub-5-second runner startup.
+- **Depot as an opt-in CI accelerator (Jun 2026, depot.dev/docs/github-actions/overview).** Added as an ↑ Upgrade in step 10, not a core step: it requires a separate account and pricing varies by plan for private repos. The integration is one `runs-on` label change per job (`ubuntu-latest` → `depot-ubuntu-latest`); no workflow logic changes. Verified figures from that doc: up to 3× faster build execution; cache upload/download at ~1,000 MiB/s vs GitHub's ~145 MiB/s (10× faster throughput); sub-5-second runner startup.
+- **Phase-first step ordering in Part 2 (Jun 2026).** Part 2 was restructured from 12 steps to 14: Supabase project creation (step 3) moves before the scaffold (step 5) and Vercel import (step 7), since creating a Supabase project depends only on having a repo (step 1), not on the scaffold. The Supabase↔GitHub connection (step 6) still precedes Vercel import because the integration auto-creates preview branches at PR-open. The Supabase↔Vercel integration (step 8) still follows Vercel import since it links the two platforms. Downstream step numbers shifted: agents → 9, workflows → 10, protect main → 11, skills → 12, lay out → 13, template → 14.
 - **Next.js copy — framework deltas (Verified Jun 2026, official docs).** This is the Next.js edition of the guide. What differs from the
   Vite baseline, and why: the public prefix is `NEXT_PUBLIC_`, which Next exposes to the
   browser natively AND which is exactly what the Supabase→Vercel integration injects into
   previews — so production and previews share one set of names and the Vite two-prefix
   fallback / `envPrefix` workaround is **removed**, not adapted (its workaround-table row
-  is gone here, and the routine in step 11 drops that item). Supabase is reached through
+  is gone here, and the routine in step 13 drops that item). Supabase is reached through
   `@supabase/ssr` — a browser `createBrowserClient` plus a server `createServerClient`
   reading cookies, with `middleware.ts` refreshing the session — instead of a single
   browser singleton; there is **no `vercel.json`** (Vercel builds Next natively; the SPA
