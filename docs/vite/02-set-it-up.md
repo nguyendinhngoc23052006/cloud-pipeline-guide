@@ -277,7 +277,8 @@ wasn't empty — make a fresh one.
    and make sure your Supabase project is linked to this Vercel project.
 7. In **Supabase → Project → Settings → Integrations → Vercel**, click **Manage**
    on your connection and change **Prefix** from `NEXT_PUBLIC_` to `VITE_` →
-   **Save**.
+   **Save** (previews now receive the same `VITE_` names you set in step 6.2 —
+   production was already using them).
 8. Back in Vercel's **Environment Variables**, delete any **Production**-scoped
    variable whose name contains `SECRET`, `SERVICE_ROLE`, `JWT`, or `POSTGRES` —
    nothing in this stack uses them there. Leave the branch-scoped ones the
@@ -286,9 +287,7 @@ wasn't empty — make a fresh one.
    when the PR closes.
 
 *Note:* production values are scoped to **Production only** and carry the `VITE_`
-names you typed; the integration also injects into production, but with the
-`NEXT_PUBLIC_` prefix until step 6.7 changes it — that ordering is why step 6.2
-sets them by hand (production works immediately, no gap). Each PR's preview gets its **own** values from the integration
+names you typed. Each PR's preview gets its **own** values from the integration
 when a PR opens or a commit is pushed, injected under the same `VITE_` names
 (step 6.7 set the prefix) — the client reads one set of names in all environments,
 so nothing needs configuring on either dashboard. Two health signs on any open PR:

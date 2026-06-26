@@ -277,7 +277,8 @@ wasn't empty — make a fresh one.
    and make sure your Supabase project is linked to this Vercel project.
 7. In **Supabase → Project → Settings → Integrations → Vercel**, click **Manage**
    on your connection and change **Prefix** from `NEXT_PUBLIC_` to `PUBLIC_` →
-   **Save**.
+   **Save** (previews now receive the same `PUBLIC_` names you set in step 6.2 —
+   production was already using them).
 8. Back in Vercel's **Environment Variables**, delete any **Production**-scoped
    variable whose name contains `SECRET`, `SERVICE_ROLE`, `JWT`, or `POSTGRES` —
    nothing in this stack uses them there. Leave the branch-scoped ones the
