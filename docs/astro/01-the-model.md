@@ -41,14 +41,13 @@ throwaway `claude/…` branch that becomes a PR.
   Claude's own checklist locally.
 
 **The env-var names are a contract.** Astro reaches Supabase on the SERVER (its SSR
-middleware sees every variable regardless of prefix), so it resolves
-`PUBLIC_SUPABASE_URL ?? NEXT_PUBLIC_SUPABASE_URL` (and the key) from `process.env`
-directly — `PUBLIC_` is what you set by hand in Vercel (production), `NEXT_PUBLIC_` is
-what the Supabase integration injects into previews. No `vite.envPrefix` bridge is
-needed; a client island that needs Supabase gets the public URL + key passed down from
-the server. The contract lives in the Supabase client + `src/middleware.ts`,
-`.env.example`, and the Vercel production variable names — these name the same two
-values, so a change to any one moves all of them in one PR.
+middleware reads `process.env`), so it reads `PUBLIC_SUPABASE_URL` (and the key)
+directly — `PUBLIC_` is what you set by hand in Vercel (production), and step 6.7
+sets the integration's prefix so previews inject the same `PUBLIC_`-named vars. A
+client island that needs Supabase gets the public URL + key passed down from the
+server. The contract lives in the Supabase client + `src/middleware.ts`,
+`.env.example`, and the Vercel production variable names — these all use `PUBLIC_`,
+so a change to any one moves all of them in one PR.
 
 **One collision to remember:** Vercel **"Preview"** (a variable *scope*) is not a
 PR's **preview** (its live URL).

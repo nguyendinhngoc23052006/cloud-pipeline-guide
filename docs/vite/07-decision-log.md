@@ -38,12 +38,12 @@ needs annoying setup for marginal gain, leave it out.**
   schema onto every new project. Templates copy files, not settings — so the
   ruleset rides as committed JSON (one-click import) and the dashboards are redone
   per project.
-- **Env-var seam:** the client reads `VITE_` names first (set by hand,
-  Production-scoped) with a `NEXT_PUBLIC_` fallback (the integration's fixed
-  injected names for previews); `envPrefix` exposes both; only **Production**-scoped
-  secrets are deleted from Vercel by hand (the integration's branch-scoped preview
-  copies clean themselves up). The old per-connection prefix setting and "sync to
-  Preview" toggle no longer exist in the integration UI.
+- **Env-var seam:** the client reads only `VITE_` names; `envPrefix: ['VITE_']`
+  exposes them to the browser; step 6.7 sets the Supabase→Vercel integration's
+  per-connection prefix to `VITE_` so previews receive the same names as
+  production — no fallback needed. Only **Production**-scoped secrets are deleted
+  from Vercel by hand (the integration's branch-scoped preview copies clean
+  themselves up). *(field + docs, Jun 2026)*
 - **Checks:** a `main` ruleset requires a PR + 1 approval + green checks (`tests`,
   `lint`, `typecheck`, `e2e` from GitHub Actions, **Supabase Preview**, and **Vercel** —
   picked under the picker's **Suggestions**, never **Vercel Preview Comments**).
@@ -166,12 +166,15 @@ needs annoying setup for marginal gain, leave it out.**
   *post-merge* release gate that imports GitHub checks — they are not PR checks and
   there are no native lint/typecheck toggles, so lint/typecheck run as GitHub
   Actions jobs and the import is offered as the step 9 upgrade. The Supabase→Vercel
-  integration exposes no prefix or "sync to Preview" setting; it injects fixed
-  `NEXT_PUBLIC_` names at PR-open and auto-redeploys the PR's latest deployment
-  (supabase.com/docs/guides/deployment/branching/integrations) — the manual
-  redeploy-on-race workaround retired. Field-verified on a live setup: sync fires
-  at PR-open **only**; injected vars are branch-scoped and deleted at PR
-  close/merge; the integration also syncs branch-scoped secret-tier keys
+  integration's **per-connection prefix is configurable** (Supabase → Project →
+  Settings → Integrations → Vercel → Manage → Customize prefix — field-verified
+  Jun 2026; supabase/supabase PR #28058 merged Jul 2024); step 6.7 sets it to
+  `VITE_` so previews inject the same names as production, retiring the
+  `NEXT_PUBLIC_` fallback chain. Env sync fires at PR-open **and** on push/branch
+  creation — field-verified Jun 2026, retiring the close/reopen workaround. The
+  integration auto-redeploys the PR's latest deployment
+  (supabase.com/docs/guides/deployment/branching/integrations). Injected vars are
+  branch-scoped and deleted at PR close/merge; the integration also syncs branch-scoped secret-tier keys
   (acceptable — ephemeral and browser-unreachable), so only **Production**-scoped
   secrets are deleted by hand; "Supabase changes only" skips branch creation for
   code-only PRs; an orphaned Supabase↔Vercel connection shows no error anywhere —

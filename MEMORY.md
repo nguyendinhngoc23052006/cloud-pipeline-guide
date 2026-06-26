@@ -17,19 +17,22 @@ start of every task, and record decisions, root causes, and gotchas as you go.
   this is rejected no matter how good otherwise.
 
 ## Per-framework env wiring (the only real delta)
-- The Supabase→Vercel integration injects fixed `NEXT_PUBLIC_SUPABASE_URL` /
-  `NEXT_PUBLIC_SUPABASE_ANON_KEY` into each preview; production names are set by
-  hand. So the client must read both.
-  - **Vite**: native `VITE_`; bridge previews via `envPrefix: ['VITE_','NEXT_PUBLIC_']`,
-    read `VITE_ ?? NEXT_PUBLIC_`.
-  - **Next.js**: native `NEXT_PUBLIC_` — production AND preview share these names, so
-    NO fallback and NO envPrefix; the Vite workaround does not exist here.
-  - **Astro**: native `PUBLIC_`; the SERVER (middleware) resolves `PUBLIC_ ?? NEXT_PUBLIC_`
-    from `process.env` and passes public values to islands — NO `vite.envPrefix` (that
-    override has a known Astro breakage, issue #10406).
-  - **SvelteKit**: native `PUBLIC_`, but its public `$env` takes one prefix — resolve
-    `PUBLIC_ ?? NEXT_PUBLIC_` on the SERVER (hooks.server.ts) and pass the values to
-    the browser via the root layout load.
+- The Supabase→Vercel integration's per-connection prefix is configurable (Supabase →
+  Project → Settings → Integrations → Vercel → Manage → Customize prefix — step 6.7,
+  AFTER step 6.5 installs the marketplace app, because the connection doesn't exist until then).
+  Set it to the framework's native prefix; production and preview then share the same names,
+  and no cross-prefix fallback is needed.
+  - **Vite**: native `VITE_`; step 6.7 sets integration prefix to `VITE_`; `envPrefix:
+    ['VITE_']`; read `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY ?? VITE_SUPABASE_ANON_KEY`; no fallback.
+  - **Next.js**: native `NEXT_PUBLIC_` — the integration default already matches; no
+    change to prefix needed; NO fallback and NO envPrefix.
+  - **Astro**: native `PUBLIC_`; step 6.7 sets integration prefix to `PUBLIC_`; SERVER
+    (middleware) reads `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    PUBLIC_SUPABASE_ANON_KEY` from `process.env`; passes public values to islands —
+    NO `vite.envPrefix` (that override has a known Astro breakage, issue #10406).
+  - **SvelteKit**: native `PUBLIC_`; step 6.7 sets integration prefix to `PUBLIC_`;
+    SERVER (hooks.server.ts) reads `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    PUBLIC_SUPABASE_ANON_KEY` from `process.env`; passes values via root layout load.
 
 ## Quality gate (never skip)
 - Verify every platform claim against CURRENT official docs before changing it; carry
@@ -47,18 +50,20 @@ start of every task, and record decisions, root causes, and gotchas as you go.
   (verify-before-asserting), `Simplicity` (code-floor + effort scaling),
   `Your place + every-PR rules` (Action care), `Agents, plugins, MCP` (Skill-first).
   Byte-identical across all 4 framework copies of `docs/<framework>/02-set-it-up.md`.
-- **Open currency items (shared — for a follow-up refresh, affect the merged Vite copy too):**
-  (1) Supabase is renaming `anon`→`sb_publishable_…`; post-Nov-2025 projects lack the
-  legacy anon key, and the Vercel integration's injection of the new name has open bug
-  #38984 — the client's `…PUBLISHABLE_KEY ?? …ANON_KEY` read covers both today.
-  (2) A search snippet suggests the integration's injected prefix may be configurable in
-  the Supabase dashboard (direct doc fetch 403'd) — would retire the bridge workaround, but
-  CONFLICTS with the field-verified "fixed names" claim, so re-verify before acting.
-- **Open editing item (follow-on PR):** pre-existing arrow-rule violations in the
-  constitution block, identical across all 4 framework copies, at
-  `02-set-it-up.md:140` (Memory "Cycle"), `:141` (Memory "Worked/failed"), `:144`
-  (Your place "Flow"). Flagged by editing-reviewer Jun 2026 as CONCERN, out of
-  scope of the meta-behavior-layer PR; rewrite as full sentences with verbs.
+- **Verified Jun 2026 — integration injects both key names:** the External Connection
+  auto-injects both `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  *(field, Jun 2026; user Vercel dashboard — official marketplace docs list only ANON_KEY,
+  so actual injection exceeds the documented list)*. The `…PUBLISHABLE_KEY ?? …ANON_KEY`
+  fallback chain covers both; issue #38984 remains open but resolved in practice.
+- **Verified Jun 2026 — prefix IS configurable and bridges are retired:** Supabase dashboard
+  → Project → Settings → Integrations → Vercel → Manage → Customize prefix — field-verified
+  Jun 2026; supabase/supabase PR #28058 merged Jul 2024. Step 6.7 added to all three
+  non-Next frameworks (Vite → `VITE_`, Astro → `PUBLIC_`, SvelteKit → `PUBLIC_`; Next.js
+  — no change needed); placed after step 6.5 (marketplace install), not step 5. The `NEXT_PUBLIC_` prefix bridge workarounds (fallback chains in Vite/Astro/
+  SvelteKit, close/reopen ✗ instruction in all 4) retired in this PR across all copies.
+- **Arrow-rule fix Jun 2026:** three `→`-chained bullets in the constitution block of
+  `02-set-it-up.md` (Memory "Cycle", "Worked/failed"; Your place "Flow") rewritten as full
+  sentences across all 4 framework copies.
 - **"Renaming the project" section added Jun 2026** to all 4 `docs/<framework>/06-keeping-it-current.md`
   copies (byte-identical, framework-neutral). Verified: GitHub redirects break if old
   name reused (docs); Supabase branch sync breaks until reconnected via Organization →

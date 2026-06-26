@@ -39,13 +39,13 @@ needs annoying setup for marginal gain, leave it out.**
   ruleset rides as committed JSON (one-click import) and the dashboards are redone
   per project.
 - **Env-var seam:** the browser never reads a Supabase prefix directly —
-  `hooks.server.ts` resolves `PUBLIC_` names first (set by hand, Production-scoped)
-  with a `NEXT_PUBLIC_` fallback (the integration's fixed injected names for previews)
-  and the root `+layout` load passes the values to the client, because SvelteKit's
-  public `$env` exposes only one prefix. Only **Production**-scoped secrets are deleted
-  from Vercel by hand (the integration's branch-scoped preview copies clean themselves
-  up). The old per-connection prefix setting and "sync to Preview" toggle no longer
-  exist in the integration UI.
+  `hooks.server.ts` reads `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  PUBLIC_SUPABASE_ANON_KEY` from `process.env`; step 6.7 sets the integration's
+  per-connection prefix to `PUBLIC_` so previews inject the same names as production —
+  no cross-prefix fallback needed; the root `+layout` load passes the values to the
+  client. Only **Production**-scoped secrets are deleted from Vercel by hand (the
+  integration's branch-scoped preview copies clean themselves up). *(field + docs, Jun
+  2026)*
 - **Checks:** a `main` ruleset requires a PR + 1 approval + green checks (`tests`,
   `lint`, `typecheck`, `e2e` from GitHub Actions, **Supabase Preview**, and **Vercel** —
   picked under the picker's **Suggestions**, never **Vercel Preview Comments**).
@@ -168,12 +168,15 @@ needs annoying setup for marginal gain, leave it out.**
   *post-merge* release gate that imports GitHub checks — they are not PR checks and
   there are no native lint/typecheck toggles, so lint/typecheck run as GitHub
   Actions jobs and the import is offered as the step 9 upgrade. The Supabase→Vercel
-  integration exposes no prefix or "sync to Preview" setting; it injects fixed
-  `NEXT_PUBLIC_` names at PR-open and auto-redeploys the PR's latest deployment
-  (supabase.com/docs/guides/deployment/branching/integrations) — the manual
-  redeploy-on-race workaround retired. Field-verified on a live setup: sync fires
-  at PR-open **only**; injected vars are branch-scoped and deleted at PR
-  close/merge; the integration also syncs branch-scoped secret-tier keys
+  integration's **per-connection prefix is configurable** (Supabase → Project →
+  Settings → Integrations → Vercel → Manage → Customize prefix — field-verified
+  Jun 2026; supabase/supabase PR #28058 merged Jul 2024); step 6.7 sets it to
+  `PUBLIC_` so previews inject the same names as production, retiring the
+  `NEXT_PUBLIC_` fallback chain. Env sync fires at PR-open **and** on push/branch
+  creation — field-verified Jun 2026, retiring the close/reopen workaround. The
+  integration auto-redeploys the PR's latest deployment
+  (supabase.com/docs/guides/deployment/branching/integrations). Injected vars are
+  branch-scoped and deleted at PR close/merge; the integration also syncs branch-scoped secret-tier keys
   (acceptable — ephemeral and browser-unreachable), so only **Production**-scoped
   secrets are deleted by hand; "Supabase changes only" skips branch creation for
   code-only PRs; an orphaned Supabase↔Vercel connection shows no error anywhere —
@@ -223,22 +226,18 @@ needs annoying setup for marginal gain, leave it out.**
   a merged migration, one schema change in flight, never touch a DB by hand.
 - **Biome replaces ESLint + Prettier (Jun 2026, biomejs.dev).** Single binary, one `biome.json` config, ~10–25× faster than ESLint + Prettier in CI. The `lint` script runs `biome check .` (read-only, CI-safe); `biome check --write .` fixes locally. Type-aware TS coverage is partial — no official overall percentage published by the team; individual rule detection can be as low as 75% for specific rules — accepted because the gap is narrow for standard TypeScript apps and the speed and simplicity gains are significant. The `lint` script name is unchanged; it remains the CI contract.
 - **Depot as an opt-in CI accelerator (Jun 2026, depot.dev/docs/github-actions/overview).** Added as an ↑ Upgrade in step 8, not a core step: it requires a separate account and pricing varies by plan for private repos. The integration is one `runs-on` label change per job (`ubuntu-latest` → `depot-ubuntu-latest`); no workflow logic changes. Verified figures from that doc: up to 3× faster build execution; cache upload/download at ~1,000 MiB/s vs GitHub's ~145 MiB/s (10× faster throughput); sub-5-second runner startup.
-- **SvelteKit copy — framework deltas (Verified Jun 2026, official docs).** This is the SvelteKit edition (`@sveltejs/adapter-vercel`). What
-  differs from the Vite baseline, and why: the browser prefix is `PUBLIC_`, but
-  SvelteKit's public `$env` exposes a SINGLE prefix, so it can't list both `PUBLIC_` and
-  the integration's injected `NEXT_PUBLIC_`. The fix is to resolve `PUBLIC_ ?? NEXT_PUBLIC_`
-  on the SERVER in `hooks.server.ts` (every variable is readable there regardless of
-  prefix — `PUBLIC_` via `$env/dynamic/public`, the `NEXT_PUBLIC_`-named vars via
-  `$env/dynamic/private`) and pass the values to the browser through the root `+layout`
-  load; the browser client is built from that load data, never from a client-exposed
-  prefix. Supabase uses `@supabase/ssr` (server client on `event.locals` + a browser
-  client in `+layout.ts`); there is **no `vercel.json`** (the adapter handles routing);
-  Edge-function `npm:` aliasing stays in `vite.config.ts` (SvelteKit has one). Verified
-  against svelte.dev/docs/kit/$env-dynamic-public and $env-dynamic-private (a
-  `NEXT_PUBLIC_`-named var doesn't match `publicPrefix`, so SvelteKit treats it as private/
-  server-only — confirming the server-resolve approach),
-  supabase.com/docs/guides/auth/server-side/sveltekit (hooks.server.ts + event.cookies +
-  locals + +layout pattern), and svelte.dev/docs/kit/adapter-vercel (zero-config, no
-  vercel.json). *(Open currency note shared by all copies: the `anon`→`sb_publishable_…`
-  key rename; the client's `…PUBLISHABLE_KEY ?? …ANON_KEY` read covers both. Tracked in
-  MEMORY.md.)*
+- **SvelteKit copy — framework deltas (Verified Jun 2026, official docs).** This is the SvelteKit edition (`@sveltejs/adapter-vercel`). What differs from the Vite
+  baseline, and why: the browser prefix is `PUBLIC_`; `hooks.server.ts` reads
+  `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY`
+  from `process.env` — step 6.7 sets the integration's prefix to `PUBLIC_` so previews
+  inject the same names, no cross-prefix fallback needed — and passes the values to the
+  browser through the root `+layout` load; the browser client is built from that load
+  data, never from a client-exposed prefix. Supabase uses `@supabase/ssr` (server client
+  on `event.locals` + a browser client in `+layout.ts`); there is **no `vercel.json`**
+  (the adapter handles routing); Edge-function `npm:` aliasing stays in `vite.config.ts`
+  (SvelteKit has one). Verified against svelte.dev/docs/kit/$env-dynamic-public and
+  $env-dynamic-private, supabase.com/docs/guides/auth/server-side/sveltekit (hooks.server.ts
+  + event.cookies + locals + +layout pattern), and svelte.dev/docs/kit/adapter-vercel
+  (zero-config, no vercel.json). *(Open currency note shared by all copies: the
+  `anon`→`sb_publishable_…` key rename; the client's `…PUBLISHABLE_KEY ?? …ANON_KEY`
+  read covers both. Tracked in MEMORY.md.)*

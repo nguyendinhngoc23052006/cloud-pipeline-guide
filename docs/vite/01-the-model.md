@@ -41,14 +41,13 @@ throwaway `claude/…` branch that becomes a PR.
   Claude's own checklist locally.
 
 **The env-var names are a contract.** The browser only sees variables carrying a
-public prefix **Vite** exposes (`envPrefix`). This stack exposes two: `VITE_` for
-the values you set by hand in Vercel (production), and `NEXT_PUBLIC_` for the
-values the Supabase integration injects into previews (its fixed names — there is
-no setting to change them). The client reads `VITE_` first and falls back to
-`NEXT_PUBLIC_`. The contract lives in `vite.config.ts` (`envPrefix`),
+public prefix **Vite** exposes (`envPrefix`). This stack exposes one: `VITE_` —
+the values you set by hand in Vercel (production) and the values the Supabase
+integration injects into previews share this prefix (step 6.7 sets it). The
+contract lives in `vite.config.ts` (`envPrefix: ['VITE_']`),
 `src/lib/supabaseClient.ts`, `.env.example`, and the Vercel production variable
-names — these four name the same two values, so a change to any one moves all of
-them in one PR.
+names — these four all use `VITE_`, so a change to any one moves all of them in
+one PR.
 
 **One collision to remember:** Vercel **"Preview"** (a variable *scope*) is not a
 PR's **preview** (its live URL).

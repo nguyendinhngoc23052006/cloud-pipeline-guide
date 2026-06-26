@@ -41,14 +41,13 @@ throwaway `claude/…` branch that becomes a PR.
   Claude's own checklist locally.
 
 **The env-var names are a contract.** The browser only sees Supabase config the
-SERVER hands it: `hooks.server.ts` resolves the URL + key and the root `+layout` load
-passes them to the client. SvelteKit's public `$env` exposes only one prefix, so this
-server bridge is how production's `PUBLIC_` names and previews' injected `NEXT_PUBLIC_`
-names (the integration's fixed names — there is no setting to change them) both reach
-the browser, reading `PUBLIC_` first and falling back to `NEXT_PUBLIC_`. The contract
-lives in `hooks.server.ts`, `src/routes/+layout.server.ts` / `+layout.ts`,
-`.env.example`, and the Vercel production variable names — these name the same two
-values, so a change to any one moves all of them in one PR.
+SERVER hands it: `hooks.server.ts` reads `PUBLIC_SUPABASE_URL` and
+`PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY` from `process.env` and the
+root `+layout` load passes them to the client — step 6.7 sets the integration's prefix
+so previews inject the same `PUBLIC_` names as production. The contract lives in
+`hooks.server.ts`, `src/routes/+layout.server.ts` / `+layout.ts`, `.env.example`, and
+the Vercel production variable names — these all use `PUBLIC_`, so a change to any one
+moves all of them in one PR.
 
 **One collision to remember:** Vercel **"Preview"** (a variable *scope*) is not a
 PR's **preview** (its live URL).

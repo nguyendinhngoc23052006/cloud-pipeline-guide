@@ -114,13 +114,14 @@ optional `claude-review.yml`, `canary.yml`).
 
 ### The env-name contract
 *Spans `vite.config.ts` (`envPrefix`), `src/lib/supabaseClient.ts`,
-`.env.example`, and the Vercel **Production** variable names · set in steps 1, 4,
-and 6.* The textbook connected line: these four name the same two values (`VITE_…`
-in production, the integration's injected `NEXT_PUBLIC_…` in previews), so a change
-to any one moves all of them or none.
+`.env.example`, the Vercel **Production** variable names, and the prefix in
+Supabase → Project → Settings → Integrations → Vercel → Manage · set in steps 1,
+4, and 6.* The textbook connected line: all five use the `VITE_` prefix
+(step 6.7 configures the integration to inject `VITE_` into previews, matching
+production), so a change to any one moves all of them or none.
 
 ```text
-Change the env-name contract: <what you're changing>. Move ALL of it in ONE PR: vite.config.ts envPrefix, src/lib/supabaseClient.ts fallback chain, .env.example, and the names I set in Vercel Production. In the "For you" block, give me the exact Vercel dashboard clicks for any Production-variable rename. Open ONE PR into main with the Self-check.
+Change the env-name contract: <what you're changing>. Move ALL of it in ONE PR: vite.config.ts envPrefix, src/lib/supabaseClient.ts, .env.example, the names I set in Vercel Production, and the prefix in Supabase → Project → Settings → Integrations → Vercel → Manage if the prefix itself changes. In the "For you" block, give me the exact Vercel dashboard clicks for any Production-variable rename. Open ONE PR into main with the Self-check.
 ```
 
 ---
@@ -191,8 +192,6 @@ Delete the workaround whose job is <…>: confirm its Retire-when condition is m
 
 | Workaround | Retire when… | Then | Verified |
 |---|---|---|---|
-| `NEXT_PUBLIC_` fallback chain in `supabaseClient` + the extra `envPrefix` entry | the Supabase→Vercel integration lets you choose the injected variable names (so previews can receive `VITE_…PUBLISHABLE_KEY`) | read only the `VITE_` names and drop `NEXT_PUBLIC_` from `envPrefix` | docs + field, Jun 2026 |
-| close/reopen the PR to retrigger env sync after fixing a connection | the integration syncs on push/branch creation, not only at PR-open | drop the reopen instruction from step 6's ✗ | field, Jun 2026 |
 | auth-seed SQL (GoTrue token columns written `''`, never NULL) + `signUp()` fallback (when you build auth) | Supabase ships **working** preview-branch user creation via the Admin API | seed via the Admin API | field (observed bug — a NULL token column logs in as "Database error querying schema"), Jun 2026 |
 | SessionStart hook loading the repo's committed `MEMORY.md` | Claude Code's native **auto memory** (v2.1.59+) syncs across machines — today it is explicitly **machine-local and not shared with cloud environments**, so every fresh cloud sandbox starts amnesiac without the committed file | move repo lessons into native memory and drop the hook | docs, Jun 2026 |
 | Custom network mode + the `cdn.playwright.dev` allowed-domain entry (so the sandbox can install Playwright's Chromium) | `cdn.playwright.dev` joins the **Trusted** default allowlist | set **Network = Trusted** and drop the Custom entry | docs + field, Jun 2026 |

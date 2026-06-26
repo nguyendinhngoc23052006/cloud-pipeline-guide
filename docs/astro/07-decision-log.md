@@ -38,14 +38,14 @@ needs annoying setup for marginal gain, leave it out.**
   schema onto every new project. Templates copy files, not settings — so the
   ruleset rides as committed JSON (one-click import) and the dashboards are redone
   per project.
-- **Env-var seam:** Astro reaches Supabase on the server, so `src/middleware.ts`
-  resolves `PUBLIC_` names first (set by hand, Production-scoped) with a `NEXT_PUBLIC_`
-  fallback (the integration's fixed injected names for previews) from `process.env` —
-  no `vite.envPrefix` override (that has a known Astro breakage, issue #10406); a client
+- **Env-var seam:** Astro reaches Supabase on the server, so `src/middleware.ts` reads
+  `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY`
+  from `process.env`; step 6.7 sets the integration's per-connection prefix to `PUBLIC_`
+  so previews inject the same names as production — no cross-prefix fallback needed, no
+  `vite.envPrefix` override (that has a known Astro breakage, issue #10406); a client
   island gets the public values passed from the server. Only **Production**-scoped
   secrets are deleted from Vercel by hand (the integration's branch-scoped preview
-  copies clean themselves up). The old per-connection prefix setting and "sync to
-  Preview" toggle no longer exist in the integration UI.
+  copies clean themselves up). *(field + docs, Jun 2026)*
 - **Checks:** a `main` ruleset requires a PR + 1 approval + green checks (`tests`,
   `lint`, `typecheck`, `e2e` from GitHub Actions, **Supabase Preview**, and **Vercel** —
   picked under the picker's **Suggestions**, never **Vercel Preview Comments**).
@@ -168,12 +168,15 @@ needs annoying setup for marginal gain, leave it out.**
   *post-merge* release gate that imports GitHub checks — they are not PR checks and
   there are no native lint/typecheck toggles, so lint/typecheck run as GitHub
   Actions jobs and the import is offered as the step 9 upgrade. The Supabase→Vercel
-  integration exposes no prefix or "sync to Preview" setting; it injects fixed
-  `NEXT_PUBLIC_` names at PR-open and auto-redeploys the PR's latest deployment
-  (supabase.com/docs/guides/deployment/branching/integrations) — the manual
-  redeploy-on-race workaround retired. Field-verified on a live setup: sync fires
-  at PR-open **only**; injected vars are branch-scoped and deleted at PR
-  close/merge; the integration also syncs branch-scoped secret-tier keys
+  integration's **per-connection prefix is configurable** (Supabase → Project →
+  Settings → Integrations → Vercel → Manage → Customize prefix — field-verified
+  Jun 2026; supabase/supabase PR #28058 merged Jul 2024); step 6.7 sets it to
+  `PUBLIC_` so previews inject the same names as production, retiring the
+  `NEXT_PUBLIC_` fallback chain. Env sync fires at PR-open **and** on push/branch
+  creation — field-verified Jun 2026, retiring the close/reopen workaround. The
+  integration auto-redeploys the PR's latest deployment
+  (supabase.com/docs/guides/deployment/branching/integrations). Injected vars are
+  branch-scoped and deleted at PR close/merge; the integration also syncs branch-scoped secret-tier keys
   (acceptable — ephemeral and browser-unreachable), so only **Production**-scoped
   secrets are deleted by hand; "Supabase changes only" skips branch creation for
   code-only PRs; an orphaned Supabase↔Vercel connection shows no error anywhere —
@@ -226,13 +229,13 @@ needs annoying setup for marginal gain, leave it out.**
 - **Astro copy — framework deltas (Verified Jun 2026, official docs).** This is the
   Astro edition (SSR via `output: 'server'` + the `@astrojs/vercel` adapter). Supabase is
   reached on the SERVER: `src/middleware.ts` builds the `@supabase/ssr` server client from
-  `context.cookies` and stores it on `context.locals`, resolving `PUBLIC_ ?? NEXT_PUBLIC_`
-  from `process.env` (the server sees every variable regardless of prefix); a client
-  island that needs Supabase gets the public URL + key passed from the server. **Why not
-  `vite.envPrefix`:** an earlier draft exposed the injected `NEXT_PUBLIC_` names to the
-  browser via `astro.config.mjs`'s `vite.envPrefix`, but custom `envPrefix` overrides have
-  a known Astro breakage (issue #10406, closed *not planned*) — the server-side resolve
-  avoids it. There is **no `vercel.json`** (the adapter handles routing). Verified against
+  `context.cookies` and stores it on `context.locals`, reading `PUBLIC_SUPABASE_URL` and
+  `PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY` from `process.env`; step 6.7
+  sets the integration's prefix to `PUBLIC_` so previews inject the same names — no
+  cross-prefix fallback needed; a client island that needs Supabase gets the public URL + key
+  passed from the server. **Why not `vite.envPrefix`:** custom `envPrefix` overrides have a
+  known Astro breakage (issue #10406, closed *not planned*) — the server-side read avoids it.
+  There is **no `vercel.json`** (the adapter handles routing). Verified against
   docs.astro.build/en/guides/environment-variables (`PUBLIC_` is the browser prefix),
   github.com/withastro/astro/issues/10406 (envPrefix breakage),
   supabase.com/docs/guides/auth/quickstarts/astrojs (middleware + cookies pattern), and

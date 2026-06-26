@@ -109,7 +109,7 @@ You are the senior DevOps engineer and **orchestrator** of four tools as one sys
 - One responsibility per file, ~200 lines; edit before creating.
 - A startup failure (e.g. missing Supabase config) renders as visible text in the page, never a blank screen — a deployment never shows a blank page.
 - Components render UI; data access and validation live in `src/services/`.
-- Read Supabase config on the SERVER (in `src/middleware.ts`, from `process.env`): resolve `PUBLIC_SUPABASE_URL ?? NEXT_PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? NEXT_PUBLIC_SUPABASE_ANON_KEY`. The `PUBLIC_` names are set by hand in Vercel (production); the `NEXT_PUBLIC_` names are what the Supabase→Vercel integration injects into previews — the server sees every variable regardless of prefix, so it bridges them with no `vite.envPrefix` config (that override has a known Astro breakage). A client island that needs Supabase gets the public URL + key passed from the server, never reading env itself. Never hardcode. The contract spans the Supabase client + `src/middleware.ts`, `.env.example`, and the Vercel production variable names; if the stack changes, move all of it in ONE PR, and never treat `PUBLIC_` as permanent.
+- Read Supabase config on the SERVER (in `src/middleware.ts`, from `process.env`): read `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY` (step 6.7 sets the integration's prefix to `PUBLIC_` so previews inject the same names as production). A client island that needs Supabase gets the public URL + key passed from the server, never reading env itself. Never hardcode. The contract spans the Supabase client + `src/middleware.ts`, `.env.example`, and the Vercel production variable names — all using `PUBLIC_`; if the stack changes, move all of it in ONE PR.
 - Folders: `src/pages` (routes + endpoints) · `src/components` (UI) · `src/hooks` (logic) · `src/services` (data + validation) · `src/lib` (incl. the Supabase client) · `src/middleware.ts` (server client + session on `locals`) · `src/types` · `supabase/migrations` (one SQL file per change) · `supabase/config.toml` · `supabase/seed.sql`.
 - **Designing structure on request** (`/prototype`, or "set up the project structure"): build it from my description — create only the feature/domain folders the project needs (a CRM → `contacts`, `deals`, `reminders`; a game → `game/{loop,scenes,entities}`), and omit the rest. Every folder gets a real, used starter file — never empty or `.gitkeep` shells. Wire it to the baseline: types in `src/types`, one core migration with RLS per table, reads through the Supabase client in `src/lib`, routes + placeholder components with loading/empty/error states. Record the layout in `docs/ARCHITECTURE.md`. Keep it a skeleton, not finished features. One PR into `main` with the "For you" block.
 
@@ -139,12 +139,12 @@ You are the senior DevOps engineer and **orchestrator** of four tools as one sys
 
 ## Memory (three tiers, self-pruning)
 - `CLAUDE.md` is your **constitution — read-only**; flag rule gaps to me, never self-edit. Learning goes to memory only.
-- One fact per tier, routed by scope: repo `MEMORY.md` = whole-scene facts ("previews inject vars under the NEXT_PUBLIC_ names") · folder `CLAUDE.md` = local wiring ("services/payment.ts re-derives amounts server-side") · agent memory = that agent's own lessons ("flagged a missing index in PR #12; pattern: filtered column"). If a fact fits two tiers, choose the narrowest.
-- Cycle: read before starting → record decision/root-cause/gotcha → correct against current code (revert a lesson when its change is reverted) → prune (≤ ~200 lines).
-- Worked → memory rides the code PR; failed → a memory-only PR you open, I merge. Never self-merge.
+- One fact per tier, routed by scope: repo `MEMORY.md` = whole-scene facts ("the integration injects PUBLIC_-named vars into previews after step 6.7") · folder `CLAUDE.md` = local wiring ("services/payment.ts re-derives amounts server-side") · agent memory = that agent's own lessons ("flagged a missing index in PR #12; pattern: filtered column"). If a fact fits two tiers, choose the narrowest.
+- Start each task by reading memory, record each decision or root cause as you go, correct a lesson when its code is reverted, and prune to stay under ~200 lines.
+- When something works, the lesson rides the code PR; when it fails, open a memory-only PR for me to merge — never self-merge.
 
 ## Your place + every-PR rules
-- Flow: build on a `claude/…` branch → ONE PR into `main` → I review the preview and merge.
+- Build on a `claude/…` branch, open ONE PR into `main`, and stop there — I review the preview and merge.
 - Your job ends at ONE PR into `main`; confirm the base is `main`; never merge or deploy (only I do).
 - Your migration runs first on the PR's preview DB; if it fails there, fix the file.
 - Irreversible actions (email, charge, state-changing API) need a preview guard + idempotency + a manual-verify flag in the PR.
@@ -158,7 +158,7 @@ You are the senior DevOps engineer and **orchestrator** of four tools as one sys
 - [ ] ≤ 1 migration, UTC-timestamped latest; new tables have RLS; src/types matches
 - [ ] tests/lint/typecheck/e2e green; happy AND unhappy paths exercised
 - [ ] scripts still named exactly `lint`, `typecheck`, `test`, and `e2e`
-- [ ] key resolved server-side (`PUBLIC_ ?? NEXT_PUBLIC_`) in middleware and passed to islands from server props; nothing hardcoded; no secret in code
+- [ ] key read from `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY` in middleware and passed to islands from server props; nothing hardcoded; no secret in code
 - [ ] irreversible actions guarded + idempotent + flagged
 - [ ] no avoidable debt; memory updated and pruned
 - [ ] migrations explained in plain English
@@ -211,14 +211,14 @@ you merge; it never self-edits. To change a rule after setup, see
 ```text
 Scaffold a MINIMAL Astro + TypeScript app (SSR: output 'server' with the @astrojs/vercel adapter) that builds green and is ready to connect to Supabase and Vercel — nothing project-specific. Create:
 - astro.config.mjs with output: 'server' and adapter: vercel().
-- src/lib/supabase.ts exporting a createServerClient (from @supabase/ssr) factory that resolves the URL/key server-side from process.env as PUBLIC_SUPABASE_URL ?? NEXT_PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? NEXT_PUBLIC_SUPABASE_ANON_KEY; throw if URL or key is missing. (The server sees every variable regardless of prefix — production's PUBLIC_ names and previews' injected NEXT_PUBLIC_ names — so no vite.envPrefix bridge is needed.)
+- src/lib/supabase.ts exporting a createServerClient (from @supabase/ssr) factory that resolves the URL/key server-side from process.env as PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY; throw if URL or key is missing. (Production and previews both inject PUBLIC_ names after step 6.7 — no cross-prefix fallback needed.)
 - src/middleware.ts building the server client from context.cookies (getAll/setAll) and putting it + the session on context.locals; a client island that needs Supabase receives the public URL + key from server-rendered props, never from import.meta.env.
 - A minimal src/pages/ that compiles and renders one page (index.astro). No feature folders yet. If startup throws (e.g. missing Supabase config), render the error message as visible text — a deployment must never show a blank page. No vercel.json (the @astrojs/vercel adapter handles routing; a SPA catch-all rewrite is Vite-SPA-only).
-- Mocked unit tests for the server resolver proving it builds from the PUBLIC_ names, from the NEXT_PUBLIC_ names alone (the preview case), and shows the readable error when both are absent.
+- Mocked unit tests for the server resolver proving it builds a client from PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY and shows the readable error when they are absent.
 - Run `npx supabase init` for config.toml (do NOT hand-write it). Leave the top-level project_id at its default (the folder name — NOT the remote ref). Set [db.seed] enabled=true, sql_paths=["./seed.sql"].
 - supabase/migrations/<UTC>_init.sql that only enables pgcrypto; supabase/seed.sql empty except a comment. (Auth users, storage buckets, and tables come later, when you build those features.)
 - Biome (single binary replacing ESLint and Prettier; `biome.json` at the root; `lint` script is `biome check .`) + strict TypeScript + Vitest with one passing test. package.json scripts named exactly `lint`, `typecheck`, and `test` (the step 8 `tests` CI job runs `npm test`).
-- A committed package-lock.json; .github/dependabot.yml (weekly npm + github-actions, grouped; omit the runs-on field — Dependabot uses GitHub-hosted runners by default); .env.example with the PUBLIC_SUPABASE_* vars; .gitignore ignoring .env*.
+- A committed package-lock.json; .github/dependabot.yml (weekly npm + github-actions, grouped; no runner field — Dependabot uses GitHub-hosted runners unless the "Dependabot on self-hosted runners" setting is ON); .env.example with the PUBLIC_SUPABASE_* vars; .gitignore ignoring .env*.
 - A short CLAUDE.md in src/ (one line: components render, services validate — see the root CLAUDE.md folders rule) and in supabase/ (one line: migrations are append-only and UTC-named — see the root migrations rule). Nothing more — they grow via the memory cycle.
 Open a PR into main.
 ```
@@ -232,8 +232,8 @@ one-time bootstrap (templated projects from step 12 skip this: their gate is up
 from the first minute).
 
 ## 5. Set up Supabase
-1. supabase.com → **New project**; **choose your GitHub repo when prompted**; save
-   the **database password**; pick the nearest region.
+1. supabase.com → **New project**; save the **database password** (you won't see it
+   again); pick the nearest region.
 2. Make sure it's a **brand-new, empty project**.
 3. Upgrade to **Pro** (Settings → Billing).
 4. On the project **home page**, click **Copy ⌄** next to the URL; copy the
@@ -247,13 +247,12 @@ from the first minute).
    credentials. Off means every PR spins a preview database that bills Pro
    compute hours until it pauses on inactivity — that's the price of every
    preview working.
-
 *Note:* one empty project becomes production *and* a fresh isolated preview
 database per PR; it must start empty because Branching replays your migrations
 onto it. "Working directory `.`" is the repo root (it holds `supabase/`). If you
-ever recreate the Supabase project or rename the repo, redo step 5.6 and steps
-6.5–6.6 — existing connections silently keep pointing at the old identity and
-sync nothing, with no error shown anywhere.
+ever recreate the Supabase project or rename the repo, redo step 5.6 and
+steps 6.5–6.7 — existing connections silently keep pointing at the old identity
+and sync nothing, with no error shown anywhere.
 
 **✓** the GitHub Connections page shows your repo linked to the project with
 branching on. If it says production has migrations the repo lacks, the project
@@ -276,31 +275,29 @@ wasn't empty — make a fresh one.
    it to this Vercel project and sign in to Supabase.
 6. In **Supabase → Organization → Integrations → Vercel**, open the connection
    and make sure your Supabase project is linked to this Vercel project.
-7. Back in Vercel's **Environment Variables**, delete any **Production**-scoped
+7. In **Supabase → Project → Settings → Integrations → Vercel**, click **Manage**
+   on your connection and change **Prefix** from `NEXT_PUBLIC_` to `PUBLIC_` →
+   **Save**.
+8. Back in Vercel's **Environment Variables**, delete any **Production**-scoped
    variable whose name contains `SECRET`, `SERVICE_ROLE`, `JWT`, or `POSTGRES` —
    nothing in this stack uses them there. Leave the branch-scoped ones the
    integration creates per PR: they're that preview's own keys, the browser can't
-   read them (only the `PUBLIC_`/`NEXT_PUBLIC_` prefixes reach the browser), and they
+   read them (only the `PUBLIC_` prefix is exposed to Astro client-side code, and islands receive values passed from the server rather than reading env directly), and they
    delete themselves when the PR closes.
 
 *Note:* production values are scoped to **Production only** and carry the `PUBLIC_`
-names you typed. Each PR's preview gets its **own** values from the integration at
-PR-open, injected under the integration's fixed `NEXT_PUBLIC_` names — `src/middleware.ts`
-resolves `PUBLIC_ ?? NEXT_PUBLIC_` server-side and passes what the browser needs to
-islands, so nothing needs configuring on either dashboard. Two health signs on any open PR: its **Supabase Preview** check
+names you typed. Each PR's preview gets its **own** values from the integration when a PR opens or a commit is pushed, injected under the same `PUBLIC_` names (step 6.7 configured the prefix) — `src/middleware.ts` reads `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? PUBLIC_SUPABASE_ANON_KEY` server-side and passes what the browser needs to islands. Two health signs on any open PR: its **Supabase Preview** check
 is green (not *skipped*), and about a minute after the first build the integration
 redeploys the preview by itself — that auto-redeploy is the visible sign the sync
 ran.
 
 **✓** open one test PR; while it is open, **Vercel → Settings → Environment
-Variables** shows `NEXT_PUBLIC_SUPABASE_*` entries scoped to **Preview** with that
-branch's name (created at PR-open, deleted when the PR merges or closes — checking
+Variables** shows `PUBLIC_SUPABASE_*` entries scoped to **Preview** with that
+branch's name (created at PR-open or on push, deleted when the PR merges or closes — checking
 after a merge always shows nothing), and the preview page renders.
 
 **✗** a preview reads the wrong database, or shows the "missing Supabase config"
-text → fix the connection (step 6.6), then **close and reopen the PR** — env sync
-fires only at the PR-open event (not on pushes or branch creation); after
-syncing, the integration redeploys the preview itself.
+text → fix the connection (step 6.6), then push any commit to the PR branch — env sync fires on push and branch creation as well as PR-open; after syncing, the integration redeploys the preview itself.
 
 **↑ Upgrade — commercial / collaborators:** Vercel Hobby is **non-commercial**,
 and on a **private repo it refuses deployments from any commit author who isn't
@@ -368,7 +365,9 @@ Create .github/workflows/ci.yml: on every pull_request AND on push to main, thre
 2. In GitHub **Settings → General**, make sure **"Automatically delete head
    branches" is OFF** and enable **"Allow auto-merge"**; then in **Settings →
    Advanced Security**, turn **Dependabot security updates ON** (CVE patches
-   arrive as PRs through the normal gate, not just weekly version bumps). Paste
+   arrive as PRs through the normal gate, not just weekly version bumps). Also
+   confirm **"Dependabot on self-hosted runners" is OFF** — if it is ON with no
+   self-hosted runners, Dependabot jobs queue indefinitely and never run. Paste
    this so Dependabot patch updates merge automatically once CI is green:
 
 ```text
@@ -571,7 +570,7 @@ Create .claude/skills/test/SKILL.md with YAML frontmatter (name: test; descripti
 **/verify — check a build:**
 
 ```text
-Create .claude/skills/verify/SKILL.md with YAML frontmatter (name: verify; description: "Walk the human through checking the current PR's preview. Use when a PR is ready for review or when asked to verify.") that, for the current PR: summarizes what changed, runs the three reviewers, confirms the preview is on its own branch DB by checking the PR's "Supabase Preview" check is green (not skipped), that /health returns ok, and that the preview renders the app rather than the "failed to start / missing Supabase config" text — if any fail, route me to step 6's ✗ remedy (fix the connection, then close and reopen the PR) — exercises the happy AND unhappy paths, and returns a plain-English what-to-click / what-should-happen / what-means-broken. Read-only. Open a PR into main.
+Create .claude/skills/verify/SKILL.md with YAML frontmatter (name: verify; description: "Walk the human through checking the current PR's preview. Use when a PR is ready for review or when asked to verify.") that, for the current PR: summarizes what changed, runs the three reviewers, confirms the preview is on its own branch DB by checking the PR's "Supabase Preview" check is green (not skipped), that /health returns ok, and that the preview renders the app rather than the "failed to start / missing Supabase config" text — if any fail, route me to step 6's ✗ remedy (fix the connection, then push any commit to the PR branch to retrigger env sync) — exercises the happy AND unhappy paths, and returns a plain-English what-to-click / what-should-happen / what-means-broken. Read-only. Open a PR into main.
 ```
 
 **/revert — undo safely:**
@@ -603,10 +602,8 @@ New routine**, pick this repo, set it **monthly**, and paste:
 
 ```text
 Re-verify each item below against the platforms' CURRENT official documentation, then check this repo's code for the workaround:
-1. The server-side PUBLIC_ ?? NEXT_PUBLIC_ resolution in src/middleware.ts (public values passed to islands from the server) — retirable when the Supabase→Vercel integration lets you choose the injected variable names (so it can inject PUBLIC_ names directly).
-2. Close/reopen-the-PR to retrigger env sync — retirable when the integration syncs on push or branch creation, not only at PR-open.
-3. Auth-seed SQL + signUp() fallback — retirable when Admin API user creation works on Supabase preview branches.
-4. The SessionStart hook loading the committed MEMORY.md — retirable when Claude Code's auto memory syncs across cloud environments.
+1. Auth-seed SQL + signUp() fallback — retirable when Admin API user creation works on Supabase preview branches.
+2. The SessionStart hook loading the committed MEMORY.md — retirable when Claude Code's auto memory syncs across cloud environments.
 If — and only if — an item's retire condition is met, open ONE PR into main removing that workaround and every part of the repo depending on it. ALWAYS end with a dated report: per item, STILL NEEDED or RETIRABLE, plus the documentation URL you read and the sentence that decides it. Never touch main directly.
 ```
 
@@ -627,7 +624,7 @@ Capture the first half once:
    project-specific may ever merge here." Then close with the audit prompt:
 
 ```text
-Audit this repo against the baseline manifest and report — fix nothing: root CLAUDE.md + folder CLAUDE.mds; EMPTY MEMORY.md; three reviewer agents plus the `researcher` worker, each with memory sidecars and no model named in their files; the Stop/SessionStart hooks; ci.yml (tests/lint/typecheck), branch-cleanup.yml, uptime.yml, e2e.yml (job `e2e`); playwright.config.ts + the e2e/ suite + the `e2e` script; dependabot.yml, dependabot-auto-merge.yml; the four skills; the scaffold with the server-side PUBLIC_ ?? NEXT_PUBLIC_ resolver (src/middleware.ts), /health, and typed resolver tests (no vercel.json); .github/main-ruleset.json; only the pgcrypto init migration. Flag anything missing, anything extra, and anything project-specific.
+Audit this repo against the baseline manifest and report — fix nothing: root CLAUDE.md + folder CLAUDE.mds; EMPTY MEMORY.md; three reviewer agents plus the `researcher` worker, each with memory sidecars and no model named in their files; the Stop/SessionStart hooks; ci.yml (tests/lint/typecheck), branch-cleanup.yml, uptime.yml, e2e.yml (job `e2e`); playwright.config.ts + the e2e/ suite + the `e2e` script; dependabot.yml, dependabot-auto-merge.yml; the four skills; the scaffold with the server-side PUBLIC_ resolver in src/middleware.ts, /health, and typed resolver tests (no vercel.json); .github/main-ruleset.json; only the pgcrypto init migration. Flag anything missing, anything extra, and anything project-specific.
 ```
 2. In the template repo: **Settings → General → Template repository → ON**.
 3. Export your working project's ruleset once — **Settings → Rules → Rulesets →
@@ -638,8 +635,8 @@ Audit this repo against the baseline manifest and report — fix nothing: root C
    Create a new repository** → grant the Claude GitHub App access to it
    (github.com → **Settings → Applications → Claude → Repository access** → add
    the new repo — step 2.1 granted only-selected repos, so each new one must be
-   added) → redo step 8.2's three clicks (auto-delete OFF, Allow auto-merge ON, Dependabot
-   security updates ON — templates copy files, never settings) → set the new cloud env's
+   added) → redo step 8.2's settings (auto-delete OFF, Allow auto-merge ON, Dependabot
+   security updates ON, self-hosted runners OFF — templates copy files, never settings) → set the new cloud env's
    network per step 2.3 (Custom + the default-package-managers box +
    `cdn.playwright.dev`) → do step 5 (new Supabase project) and step 6 (new Vercel
    project) for it → **Settings → Rules → Rulesets → Import a ruleset** → select

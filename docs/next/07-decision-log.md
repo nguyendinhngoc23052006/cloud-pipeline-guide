@@ -168,12 +168,14 @@ needs annoying setup for marginal gain, leave it out.**
   *post-merge* release gate that imports GitHub checks — they are not PR checks and
   there are no native lint/typecheck toggles, so lint/typecheck run as GitHub
   Actions jobs and the import is offered as the step 9 upgrade. The Supabase→Vercel
-  integration exposes no prefix or "sync to Preview" setting; it injects fixed
-  `NEXT_PUBLIC_` names at PR-open and auto-redeploys the PR's latest deployment
-  (supabase.com/docs/guides/deployment/branching/integrations) — the manual
-  redeploy-on-race workaround retired. Field-verified on a live setup: sync fires
-  at PR-open **only**; injected vars are branch-scoped and deleted at PR
-  close/merge; the integration also syncs branch-scoped secret-tier keys
+  integration's **per-connection prefix is configurable** (Supabase → Project →
+  Settings → Integrations → Vercel → Manage → Customize prefix — field-verified
+  Jun 2026; supabase/supabase PR #28058 merged Jul 2024); for Next.js the default
+  `NEXT_PUBLIC_` prefix is already correct — no change needed. Env sync fires at
+  PR-open **and** on push/branch creation — field-verified Jun 2026, retiring the
+  close/reopen workaround. The integration auto-redeploys the PR's latest deployment
+  (supabase.com/docs/guides/deployment/branching/integrations). Injected vars are
+  branch-scoped and deleted at PR close/merge; the integration also syncs branch-scoped secret-tier keys
   (acceptable — ephemeral and browser-unreachable), so only **Production**-scoped
   secrets are deleted by hand; "Supabase changes only" skips branch creation for
   code-only PRs; an orphaned Supabase↔Vercel connection shows no error anywhere —

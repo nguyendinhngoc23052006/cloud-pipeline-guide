@@ -191,7 +191,6 @@ Delete the workaround whose job is <…>: confirm its Retire-when condition is m
 
 | Workaround | Retire when… | Then | Verified |
 |---|---|---|---|
-| close/reopen the PR to retrigger env sync after fixing a connection | the integration syncs on push/branch creation, not only at PR-open | drop the reopen instruction from step 6's ✗ | field, Jun 2026 |
 | auth-seed SQL (GoTrue token columns written `''`, never NULL) + `signUp()` fallback (when you build auth) | Supabase ships **working** preview-branch user creation via the Admin API | seed via the Admin API | field (observed bug — a NULL token column logs in as "Database error querying schema"), Jun 2026 |
 | SessionStart hook loading the repo's committed `MEMORY.md` | Claude Code's native **auto memory** (v2.1.59+) syncs across machines — today it is explicitly **machine-local and not shared with cloud environments**, so every fresh cloud sandbox starts amnesiac without the committed file | move repo lessons into native memory and drop the hook | docs, Jun 2026 |
 | Custom network mode + the `cdn.playwright.dev` allowed-domain entry (so the sandbox can install Playwright's Chromium) | `cdn.playwright.dev` joins the **Trusted** default allowlist | set **Network = Trusted** and drop the Custom entry | docs + field, Jun 2026 |
